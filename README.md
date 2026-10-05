@@ -98,7 +98,7 @@ La revisión visual alpha4 y la migración real al arrancar en este PC siguen pe
 
 Artifact previsto: `MakerTally3D-v0.1-alpha4-win-x64-ci-<run_number>`. También se conservan los resultados TRX. Los artefactos duran 14 días. Solo se produce el artifact Windows si los tests, build y publish pasan. [Configuración oficial de setup-dotnet](https://github.com/actions/setup-dotnet), [upload-artifact](https://github.com/actions/upload-artifact).
 
-CI no se ha ejecutado todavía: la creación del repositorio privado y el primer push requieren autorización. Tras el primer CI correcto, el usuario descargará y ejecutará el ZIP manualmente; producirlo en GitHub no garantiza que Application Control lo acepte. No se desactiva seguridad ni se descarga/ejecuta automáticamente el artifact en el PC.
+Repositorio privado: [joseamc91/MakerTally3D](https://github.com/joseamc91/MakerTally3D), creado con autorización explícita. Las ejecuciones y sus resultados reales se consultan en [Actions](https://github.com/joseamc91/MakerTally3D/actions/workflows/windows-ci.yml). Tras un CI correcto, el usuario descargará y ejecutará el ZIP manualmente; producirlo en GitHub no garantiza que Application Control lo acepte. No se desactiva seguridad ni se descarga/ejecuta automáticamente el artifact en el PC.
 
 ## Privacidad y archivos históricos
 
