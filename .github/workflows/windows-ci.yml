@@ -26,7 +26,10 @@ jobs:
       AppProject: src/MakerTally.App/MakerTally.App.csproj
       TestProject: tests/MakerTally.Tests/MakerTally.Tests.csproj
       PublishDirectory: artifacts/windows-x64
-      ArtifactName: MakerTally3D-v0.1-alpha4-win-x64-ci-${{ github.run_number }}
+      ArtifactName: MakerTally3D-v0.1-alpha4-win-x64-folder-ci-${{ github.run_number }}
+      SingleBuildDirectory: artifacts/single-build
+      SinglePublishDirectory: artifacts/windows-x64-single
+      SingleArtifactName: MakerTally3D-v0.1-alpha4-win-x64-single-ci-${{ github.run_number }}
 
     steps:
       - name: Checkout
@@ -89,6 +92,43 @@ jobs:
             artifacts/${{ env.ArtifactName }}.zip
             artifacts/${{ env.ArtifactName }}.sha256
           compression-level: 0
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Restore isolated Windows single-file variant
+        run: dotnet restore $env:AppProject --artifacts-path $env:SingleBuildDirectory -p:Configuration=Release -p:WindowsOnly=true -p:WindowsSingleFile=true -r win-x64 -p:RuntimeIdentifierOverride=win-x64 -p:SelfContained=true -p:PublishTrimmed=false -p:DebugType=embedded
+
+      - name: Publish official Windows single-file EXE
+        run: dotnet publish $env:AppProject --artifacts-path $env:SingleBuildDirectory -c Release -f $env:WindowsTfm -p:WindowsOnly=true -p:WindowsSingleFile=true -r win-x64 -p:RuntimeIdentifierOverride=win-x64 --self-contained true -p:PublishTrimmed=false -p:DebugType=embedded --no-restore -o $env:SinglePublishDirectory
+
+      - name: Require one EXE and hash the EXE itself
+        run: |
+          $exe = Join-Path $env:SinglePublishDirectory 'MakerTally.exe'
+          if (!(Test-Path -LiteralPath $exe -PathType Leaf)) { throw 'MakerTally.exe is missing from single-file publication.' }
+          $entries = @(Get-ChildItem -LiteralPath $env:SinglePublishDirectory -Force -Recurse)
+          $unexpected = @($entries | Where-Object { $_.FullName -ne (Get-Item -LiteralPath $exe).FullName })
+          if ($entries.Count -ne 1 -or $unexpected.Count -ne 0) {
+            $entries | Select-Object FullName, Length | Format-Table -AutoSize
+            throw 'Single-file publication has external files or directories. Nothing was deleted; inspect the SDK output before distribution.'
+          }
+          $exeFile = Get-Item -LiteralPath $exe
+          $hash = (Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  MakerTally.exe" | Set-Content -LiteralPath "$exe.sha256" -Encoding ascii
+          "Single-file EXE bytes: $($exeFile.Length)" | Write-Output
+          "Single-file EXE SHA-256: $hash" | Write-Output
+          'Single-file contents: MakerTally.exe, MakerTally.exe.sha256' | Write-Output
+          "Single-file artifact: $env:SingleArtifactName" >> $env:GITHUB_STEP_SUMMARY
+          "EXE size: $($exeFile.Length) bytes; SHA-256: $hash" >> $env:GITHUB_STEP_SUMMARY
+          'Contents: MakerTally.exe and MakerTally.exe.sha256 only. Official unpackaged, self-contained bundle; dependencies may extract at launch. Download and run manually.' >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Upload single-file EXE and its SHA-256
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: ${{ env.SingleArtifactName }}
+          path: |
+            ${{ env.SinglePublishDirectory }}/MakerTally.exe
+            ${{ env.SinglePublishDirectory }}/MakerTally.exe.sha256
+          compression-level: 6
           retention-days: 14
           if-no-files-found: error
 

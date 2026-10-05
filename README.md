@@ -82,7 +82,7 @@ dotnet publish src/MakerTally.App/MakerTally.App.csproj -c Release -f net10.0-wi
 
 `WindowsOnly=true` selecciona solo el target Windows **dentro del proyecto App**, sin propagar un TargetFrameworks Windows a Core. Sin este selector se mantienen Windows y Android reales. No ejecutar restore de la solución multitarget completa para una tarea Windows.
 
-La publicación oficial sin empaquetar incluye .NET y Windows App SDK: conservar todos sus archivos y abrir `MakerTally.exe`. No es un ejecutable único, no crea instalador y no tiene firma Authenticode comercial. [Publicación oficial de MAUI Windows](https://learn.microsoft.com/en-us/dotnet/maui/windows/deployment/publish-unpackaged-cli?view=net-maui-10.0).
+La variante por carpeta, publicada oficialmente sin empaquetar, incluye .NET y Windows App SDK: conservar todos sus archivos y abrir `MakerTally.exe`. Esta variante no es un ejecutable único, no crea instalador y no tiene firma Authenticode comercial. [Publicación oficial de MAUI Windows](https://learn.microsoft.com/en-us/dotnet/maui/windows/deployment/publish-unpackaged-cli?view=net-maui-10.0).
 
 ## Tests y estado real
 
@@ -96,9 +96,17 @@ La revisión visual alpha4 y la migración real al arrancar en este PC siguen pe
 
 `.github/workflows/windows-ci.yml` permite `workflow_dispatch`, push a `main` y pull requests a `main`, con `windows-latest`. Instala .NET según `global.json` y exclusivamente `maui-windows`. Restaura tests y App Windows, exige que todos los casos se ejecuten y pasen, compila/publica Release x64, comprime la carpeta completa y sube el ZIP con SHA-256. No hay Android, Release, tag ni firma automática.
 
-Artifact previsto: `MakerTally3D-v0.1-alpha4-win-x64-ci-<run_number>`. También se conservan los resultados TRX. Los artefactos duran 14 días. Solo se produce el artifact Windows si los tests, build y publish pasan. [Configuración oficial de setup-dotnet](https://github.com/actions/setup-dotnet), [upload-artifact](https://github.com/actions/upload-artifact).
+Artifacts temporales para comparación A/B: `MakerTally3D-v0.1-alpha4-win-x64-folder-ci-<run_number>` y `MakerTally3D-v0.1-alpha4-win-x64-single-ci-<run_number>`. También se conservan los resultados TRX. Los artefactos duran 14 días. Solo se produce el artifact Windows si los tests, build y publish pasan. [Configuración oficial de setup-dotnet](https://github.com/actions/setup-dotnet), [upload-artifact](https://github.com/actions/upload-artifact).
 
 Repositorio privado: [joseamc91/MakerTally3D](https://github.com/joseamc91/MakerTally3D), creado con autorización explícita. Las ejecuciones y sus resultados reales se consultan en [Actions](https://github.com/joseamc91/MakerTally3D/actions/workflows/windows-ci.yml). Tras un CI correcto, el usuario descargará y ejecutará el ZIP manualmente; producirlo en GitHub no garantiza que Application Control lo acepte. No se desactiva seguridad ni se descarga/ejecuta automáticamente el artifact en el PC.
+
+### Variante single-file de Windows (prueba de distribución Alpha)
+
+Windows CI conserva la publicación por carpeta y produce además un EXE único mediante el soporte oficial de .NET y Windows App SDK **1.7.250909003**, sin actualizar dependencias. El artifact single-file contiene únicamente `MakerTally.exe` y `MakerTally.exe.sha256`; el hash corresponde al EXE, no al ZIP de descarga de GitHub.
+
+La opción `WindowsSingleFile=true`, limitada al target Windows, activa `PublishSingleFile`, `IncludeAllContentForSelfExtract`, `EnableMsixTooling` y `SelfContained`; mantiene `WindowsPackageType=None`, `WindowsAppSDKSelfContained=true` y `PublishTrimmed=false`. Los símbolos de App/Core se embeben mediante `DebugType=embedded` al publicar. Los intermediarios de ambas variantes están separados; el CI falla si quedan archivos externos, sin borrarlos para fingir un EXE único. Android no recibe estas opciones y no se compila en este workflow.
+
+Es una distribución **unpackaged y self-contained**, sin necesidad de instalar .NET. Puede extraer internamente las dependencias al arrancar; ese comportamiento oficial se conserva. No está firmada comercialmente y continúa siendo v0.1-alpha4, no una Release estable. La aceptación por Windows Application Control y la ejecución en este PC deben probarse manualmente; el CI no descarga ni ejecuta el artifact aquí. [Single-file oficial de Windows App SDK](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/unpackage-winui-app#single-file-exe), [símbolos embebidos de .NET](https://learn.microsoft.com/en-us/dotnet/core/deploying/single-file/overview#include-pdb-files-inside-the-bundle).
 
 ## Privacidad y archivos históricos
 
