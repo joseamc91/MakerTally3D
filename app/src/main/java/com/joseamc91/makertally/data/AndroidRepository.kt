@@ -30,7 +30,8 @@ class AndroidPrivateFiles(private val directory: File) : PrivateFiles {
 
 class PreferencesRepository(
     private val preferences: DataStore<Preferences>,
-    private val files: PrivateFiles
+    private val files: PrivateFiles,
+    private val recoveredCorruption: () -> Boolean = { false }
 ) : AppRepository {
     private val key = stringPreferencesKey("settings_json")
     private val library = FilamentStore(files)
@@ -50,6 +51,7 @@ class PreferencesRepository(
                 }
             }
         } catch (_: java.io.IOException) { notices += StorageNotice.ReadFailed; AppSettings() }
+        if (recoveredCorruption()) notices += StorageNotice.InvalidData
         val loaded = library.load()
         LoadedApp(settings, loaded.filaments, notices + loaded.notices)
     }
@@ -62,13 +64,16 @@ class PreferencesRepository(
 
 fun androidRepository(context: Context): AppRepository {
     val path = context.preferencesDataStoreFile("settings")
+    val recovered = java.util.concurrent.atomic.AtomicBoolean(false)
     val store = PreferenceDataStoreFactory.create(
         corruptionHandler = ReplaceFileCorruptionHandler {
             // Preserve invalid protobuf bytes before DataStore repairs the file.
             if (path.exists()) path.copyTo(File(path.path + ".invalid"), overwrite = true)
+            recovered.set(true)
             emptyPreferences()
         },
         produceFile = { path }
     )
-    return PreferencesRepository(store, AndroidPrivateFiles(context.filesDir))
+    return PreferencesRepository(store, AndroidPrivateFiles(context.filesDir)) { recovered.getAndSet(false) }
 }
+

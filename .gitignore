@@ -21,3 +21,8 @@ outputs/
 *.key
 Thumbs.db
 .DS_Store
+
+# Preserved local MAUI build caches are never Android source.
+.work/
+**/bin/
+**/obj/

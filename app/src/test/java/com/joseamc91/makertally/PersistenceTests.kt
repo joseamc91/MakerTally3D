@@ -43,6 +43,13 @@ class PersistenceTests {
         assertThrows(IllegalArgumentException::class.java){DataCodec.decodeSettings("{\"electricityPrice\":\"-1\"}")}
         assertThrows(IllegalArgumentException::class.java){DataCodec.decodeSettings("{\"language\":\"fr-FR\"}")}
     }
+    @Test fun semanticallyInvalidLibraryUsesSafeDefaultsAndRetainsOriginal() {
+        val files=MemoryFiles(); val valid=DataCodec.encodeFilaments(listOf(Defaults.filaments().first()))
+        val bad=valid.replace("\"spoolWeight\":\"1000\"","\"spoolWeight\":\"0\"")
+        assertNotEquals(valid,bad);files.data["filaments.json"]=bad
+        val loaded=FilamentStore(files).load();assertEquals(7,loaded.filaments.size)
+        assertEquals(listOf(StorageNotice.InvalidData),loaded.notices);assertEquals(bad,files.data["filaments.json.invalid"])
+    }
     @Test fun storageFailuresReturnDefaultsWithoutOverwritingOriginal() {
         val files=MemoryFiles();files.failWrite=true
         assertEquals(listOf(StorageNotice.SaveFailed),FilamentStore(files).load().notices)
@@ -82,3 +89,4 @@ class PersistenceTests {
         } finally { scope.cancel(); scope.coroutineContext[Job]?.join();dir.deleteRecursively() }
     }
 }
+

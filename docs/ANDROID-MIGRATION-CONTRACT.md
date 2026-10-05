@@ -46,3 +46,7 @@ ASA eSun, 141 g, 6 h, defaults: PricePerGram 0.0175; Material 2.4675; heating 0.
 - Remaining 79 behavioral cases: ported or rewritten with native equivalents. See the per-case table and subsequent native test/validation report for actual results.
 
 The initial contract commit preserves MAUI files. Native code may replace them on the migration branch only after this audit. The annotated tag and untouched main preserve the original implementation, tests, assets and history.
+
+### Native equivalence detail
+
+52 original cases are classified PORTADO, 27 REESCRITO: 79 relevant cases in total. Native tests group boundary fixtures and behaviors rather than matching xUnit counts. The optional null variant case is rewritten to Kotlin empty-string semantics; hidden legacy Windows Name/Notes are intentionally not persisted in the fresh native sandbox. Android private-path behavior is verified against the running app with adb, not emulated by a JVM Windows-path policy. The table now identifies actual native test methods and explicitly labels emulator-only checks.
