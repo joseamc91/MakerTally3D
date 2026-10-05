@@ -82,7 +82,7 @@
     <string name="sale_multiplier">Multiplicador de venta</string>
     <string name="decrease">Disminuir</string>
     <string name="increase">Aumentar</string>
-    <string name="alpha_version">v0.1-alpha4 · Alpha</string>
+    <string name="alpha_version">v0.1-alpha4</string>
     <string name="invalid_data">Se conservaron los datos dañados y se cargaron valores seguros.</string>
     <string name="read_failed">No se pudieron leer los datos. Se muestran valores seguros.</string>
     <string name="save_failed">No se pudo guardar. Tus datos anteriores se conservan.</string>

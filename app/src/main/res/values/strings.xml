@@ -82,7 +82,7 @@
     <string name="sale_multiplier">Sale multiplier</string>
     <string name="decrease">Decrease</string>
     <string name="increase">Increase</string>
-    <string name="alpha_version">v0.1-alpha4 · Alpha</string>
+    <string name="alpha_version">v0.1-alpha4</string>
     <string name="invalid_data">Damaged data was preserved and safe defaults were loaded.</string>
     <string name="read_failed">Data could not be read. Safe defaults are shown.</string>
     <string name="save_failed">Could not save. Your previous data remains unchanged.</string>

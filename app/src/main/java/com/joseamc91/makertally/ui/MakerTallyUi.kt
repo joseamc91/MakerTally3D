@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -54,12 +55,13 @@ private val darkColors = darkColorScheme(primary=Color(0xFFA8C7FF),onPrimary=Col
     secondaryContainer=Color(0xFF254777),onSecondaryContainer=Color(0xFFDCE8FF),
     background=Color(0xFF11151D),surface=Color(0xFF191D26),surfaceContainer=Color(0xFF232A36))
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable fun MakerTallyApp(model: MakerTallyViewModel, applyLocale: (String) -> Unit) {
     val state by model.state.collectAsStateWithLifecycle()
     val dark = when(state.settings.theme) { ThemeMode.System -> isSystemInDarkTheme();ThemeMode.Light -> false;ThemeMode.Dark -> true }
     val view=LocalView.current
     SideEffect { (view.context as? Activity)?.window?.let { WindowCompat.getInsetsController(it,view).apply {
-        isAppearanceLightStatusBars=!dark;isAppearanceLightNavigationBars=!dark
+        isAppearanceLightStatusBars=false;isAppearanceLightNavigationBars=false
     } } }
     LaunchedEffect(state.ready,state.settings.language) { if(state.ready)applyLocale(state.settings.language) }
     MaterialTheme(colorScheme=if(dark)darkColors else lightColors) {
@@ -67,16 +69,50 @@ private val darkColors = darkColorScheme(primary=Color(0xFFA8C7FF),onPrimary=Col
             if (!state.ready) Box(Modifier.fillMaxSize(),contentAlignment=Alignment.Center) { CircularProgressIndicator() }
             else Scaffold(
                 containerColor=MaterialTheme.colorScheme.background,
-                bottomBar={ NavigationBar {
+                topBar={
+                    TopAppBar(
+                        title={
+                            if(state.destination==Destination.Calculator) Row(
+                                verticalAlignment=Alignment.CenterVertically,
+                                horizontalArrangement=Arrangement.spacedBy(10.dp)
+                            ) {
+                                Image(painterResource(R.drawable.ic_makertally_brand_mark),contentDescription=null,
+                                    modifier=Modifier.size(32.dp))
+                                Text(stringResource(R.string.app_name),maxLines=1,overflow=TextOverflow.Ellipsis,
+                                    style=MaterialTheme.typography.titleLarge,fontWeight=FontWeight.SemiBold)
+                            } else Text(stringResource(state.destination.title()),maxLines=1,overflow=TextOverflow.Ellipsis,
+                                style=MaterialTheme.typography.titleLarge,fontWeight=FontWeight.SemiBold)
+                        },
+                        actions={
+                            if(state.destination==Destination.Filaments) FilamentSortAction(state,model)
+                            else if(state.destination==Destination.Settings) Text(
+                                stringResource(R.string.alpha_version),
+                                modifier=Modifier.padding(horizontal=12.dp),
+                                style=MaterialTheme.typography.labelSmall,
+                                color=MakerTallyWhite.copy(alpha=.65f),
+                                maxLines=1
+                            )
+                        },
+                        colors=TopAppBarDefaults.topAppBarColors(containerColor=MakerTallyNavy,
+                            scrolledContainerColor=MakerTallyNavy,titleContentColor=MakerTallyWhite,
+                            actionIconContentColor=MakerTallyWhite)
+                    )
+                },
+                bottomBar={ NavigationBar(containerColor=MakerTallyNavy) {
                     Destination.entries.forEach { destination ->
                         val title=stringResource(destination.title())
                         NavigationBarItem(selected=state.destination==destination,onClick={model.navigate(destination)},
                             icon={ NavigationIcon(destination) },label={Text(title,maxLines=1)},
+                            colors=NavigationBarItemDefaults.colors(
+                                selectedIconColor=MakerTallyGreen,selectedTextColor=MakerTallyWhite,
+                                unselectedIconColor=MakerTallyWhite.copy(alpha=.75f),
+                                unselectedTextColor=MakerTallyWhite.copy(alpha=.75f),
+                                indicatorColor=MakerTallyWhite.copy(alpha=.12f).compositeOver(MakerTallyNavy)),
                             modifier=Modifier.testTag("nav_${destination.name.lowercase()}"))
                     }
                 } }
             ) { insets ->
-                Box(Modifier.padding(insets).fillMaxSize()) {
+                Box(Modifier.padding(insets).consumeWindowInsets(insets).fillMaxSize()) {
                     when(state.destination) {
                         Destination.Calculator -> CalculatorPage(state,model)
                         Destination.Filaments -> FilamentsPage(state,model)
@@ -119,7 +155,6 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
         }
     }
 }
-@Composable private fun PageTitle(resource:Int) { Text(stringResource(resource),style=MaterialTheme.typography.headlineSmall,fontWeight=FontWeight.SemiBold) }
 @Composable private fun SoftCard(modifier:Modifier=Modifier,content:@Composable ColumnScope.()->Unit) {
     Card(modifier.fillMaxWidth(),shape=RoundedCornerShape(18.dp),colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.surface)) {
         Column(Modifier.padding(16.dp),verticalArrangement=Arrangement.spacedBy(10.dp),content=content)
@@ -179,7 +214,6 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
     }
     fun money(value:BigDecimal?,places:Int=2)=Formatting.money(value,lang,places)
     Column(Modifier.fillMaxSize().onSizeChanged{viewportHeight=it.height}.verticalScroll(scroll).padding(16.dp),verticalArrangement=Arrangement.spacedBy(14.dp)) {
-        PageTitle(R.string.calculator)
         Card(Modifier.fillMaxWidth(),shape=RoundedCornerShape(20.dp),colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.primaryContainer)) {
             Column(Modifier.padding(horizontal=20.dp,vertical=18.dp)) {
                 Text(stringResource(R.string.suggested_price),style=MaterialTheme.typography.labelLarge,color=MaterialTheme.colorScheme.onPrimaryContainer)
@@ -235,6 +269,26 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
         Spacer(Modifier.height(4.dp))
     }
 }
+@Composable private fun FilamentSortAction(state:UiState,model:MakerTallyViewModel) {
+    var sorting by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick={sorting=true},modifier=Modifier.size(48.dp).testTag("filament_sort")) {
+            Icon(painterResource(R.drawable.ic_sort),contentDescription=stringResource(R.string.sort_filaments))
+        }
+        DropdownMenu(expanded=sorting,onDismissRequest={sorting=false}) {
+            FilamentSort.entries.forEach { mode ->
+                val selected=state.settings.filamentSort==mode
+                DropdownMenuItem(text={Text(stringResource(when(mode) {
+                    FilamentSort.Name->R.string.sort_name
+                    FilamentSort.PriceAscending->R.string.sort_price_ascending
+                    FilamentSort.PriceDescending->R.string.sort_price_descending
+                }))},leadingIcon={Text(if(selected)"✓"else"",Modifier.clearAndSetSemantics { })},
+                    modifier=Modifier.testTag("sort_${mode.name.lowercase()}").semantics{this.selected=selected},
+                    onClick={sorting=false;model.sort(mode)})
+            }
+        }
+    }
+}
 @Composable private fun FilamentsPage(state:UiState,model:MakerTallyViewModel) {
     val listState=rememberLazyListState()
     LaunchedEffect(state.settings.filamentSort) { listState.scrollToItem(0) }
@@ -242,27 +296,6 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
         orderedFilaments(state.filaments,state.settings.filamentSort,state.settings.language)
     }
     Column(Modifier.fillMaxSize().padding(horizontal=16.dp)) {
-        Row(Modifier.fillMaxWidth().padding(vertical=8.dp),verticalAlignment=Alignment.CenterVertically) {
-            Box(Modifier.weight(1f)){PageTitle(R.string.filaments)}
-            var sorting by remember { mutableStateOf(false) }
-            Box {
-                IconButton(onClick={sorting=true},modifier=Modifier.size(48.dp).testTag("filament_sort")) {
-                    Icon(painterResource(R.drawable.ic_sort),contentDescription=stringResource(R.string.sort_filaments))
-                }
-                DropdownMenu(expanded=sorting,onDismissRequest={sorting=false}) {
-                    FilamentSort.entries.forEach { mode ->
-                        val selected=state.settings.filamentSort==mode
-                        DropdownMenuItem(text={Text(stringResource(when(mode) {
-                            FilamentSort.Name->R.string.sort_name
-                            FilamentSort.PriceAscending->R.string.sort_price_ascending
-                            FilamentSort.PriceDescending->R.string.sort_price_descending
-                        }))},leadingIcon={Text(if(selected)"✓"else"",Modifier.clearAndSetSemantics { })},
-                            modifier=Modifier.testTag("sort_${mode.name.lowercase()}").semantics{this.selected=selected},
-                            onClick={sorting=false;model.sort(mode)})
-                    }
-                }
-            }
-        }
         Box(Modifier.weight(1f)) {
             LazyColumn(Modifier.fillMaxSize(),state=listState,contentPadding=PaddingValues(bottom=96.dp),verticalArrangement=Arrangement.spacedBy(10.dp)) {
                 if(state.filaments.isEmpty()) item { Text(stringResource(R.string.no_filaments)) }
@@ -304,7 +337,6 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
 @Composable private fun SettingsPage(state:UiState,model:MakerTallyViewModel) {
     val settings=state.settings;val lang=settings.language
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
-        PageTitle(R.string.settings)
         Text(stringResource(R.string.language),style=MaterialTheme.typography.labelLarge)
         SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
             listOf("es-ES" to R.string.spanish,"en-US" to R.string.english).forEachIndexed { index,(code,title) ->
@@ -327,7 +359,6 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
         StepRow(R.string.heating_time,Formatting.number(settings.heatingMinutes,lang)+" "+stringResource(R.string.unit_min),"heating_time",settings.heatingMinutes>BigDecimal.ZERO,{model.step(SettingStep.HeatingMinutes,false)},{model.step(SettingStep.HeatingMinutes,true)})
         StepRow(R.string.machine_rate,Formatting.money(settings.machineRate,lang)+stringResource(R.string.unit_per_h),"machine_rate",settings.machineRate>BigDecimal.ZERO,{model.step(SettingStep.MachineRate,false)},{model.step(SettingStep.MachineRate,true)})
         StepRow(R.string.sale_multiplier,"×"+Formatting.number(settings.saleMultiplier,lang,1),"multiplier",settings.saleMultiplier>BigDecimal.ONE,{model.step(SettingStep.Multiplier,false)},{model.step(SettingStep.Multiplier,true)})
-        Text(stringResource(R.string.alpha_version),Modifier.padding(vertical=8.dp),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 @Composable private fun SectionLabel(title:Int) {

@@ -3,6 +3,7 @@ package com.joseamc91.makertally
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.SystemBarStyle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -18,7 +19,14 @@ class MainActivity : AppCompatActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        // Draw the Compose chrome behind transparent system bars on every supported API.
+        // Keep the platform's contrast protection for three-button navigation.
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.auto(
+                android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT
+            ) { true }
+        )
         setContent { MakerTallyApp(model) { language ->
             if (AppCompatDelegate.getApplicationLocales().toLanguageTags() != language)
                 AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(language))
