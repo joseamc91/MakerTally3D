@@ -1,5 +1,7 @@
 # Android alpha4 validation
 
+Historical report from the initial native Android migration, before Android became canonical on `main`. Branch locations, test counts and publication status below describe that earlier stage; see the current README and UX polish report for the current state.
+
 ## Preserved source and scope
 
 Source of truth: MAUI commit `f64b45d0656b88ce1f97894d90323916f4638737`, protected by annotated tag `maui-alpha4-final`. `main` remains at that commit. Only `android-native` contains the native rewrite. No release, merge, license, public visibility change or new business feature.

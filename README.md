@@ -2,9 +2,9 @@
 
 **v0.1-alpha4 · Android native · Alpha**
 
-A small, offline 3D printing cost and pricing calculator, rebuilt in Kotlin, Jetpack Compose and Material 3. No account, backend, tracking, ads, cloud, Google Play Services or Internet permission.
+MakerTally 3D is a lightweight Android calculator for estimating the cost and suggested selling price of 3D prints. Built natively with Kotlin, Jetpack Compose and Material 3, it works completely offline with local persistence, exact decimal calculations, Spanish and English, and Light/Dark/System themes. No account, backend, telemetry, tracking, ads, Google Play Services or Internet permission.
 
-This private migration branch is `android-native`. The last .NET MAUI Windows/Android implementation remains on `main` and at annotated tag `maui-alpha4-final` (commit `f64b45d0656b88ce1f97894d90323916f4638737`). It was the functional specification, not a historical Android beta. No license or public release has been chosen. Planned distribution: F-Droid / Google Play; neither is available yet.
+`main` contains the native Android implementation. This is an alpha, not a stable release or a published Google Play application.
 
 ## Functionality
 
@@ -61,9 +61,15 @@ ASA eSun reference (141 g, 6 h, original defaults): material 2.4675, electricity
 
 ## Validation and CI
 
-The original 107 MAUI cases are individually classified in [the audit](docs/MAUI-TEST-AUDIT.csv), with behavior recorded in [the migration contract](docs/ANDROID-MIGRATION-CONTRACT.md). The initial 48 JVM tests remain intact; nine UX ordering/preferences regression tests bring the total to 57. Emulator results and known tooling warnings are recorded in [the migration validation report](docs/ANDROID-VALIDATION.md) and [the alpha4 UX polish report](docs/UX-POLISH-ALPHA4.md). Windows monitor/geometry/migration and MAUI notification infrastructure are intentionally absent.
+The suite contains 57 JVM tests covering exact calculations, numeric input, persistence, preferences, filament ordering, ViewModel state and resources. Emulator results and known tooling warnings are recorded in [the initial Android validation report](docs/ANDROID-VALIDATION.md) and [the alpha4 UX polish report](docs/UX-POLISH-ALPHA4.md).
 
-Android CI runs wrapper validation, JVM tests and `assembleDebug` on Linux, then uploads the APK as `MakerTally3D-v0.1-alpha4-android-debug-ci-<run>`. No emulator, Windows build, signing key, store publishing or Release is involved.
+Android CI runs on pushes and pull requests to `main` or `android-native`, and can also be dispatched manually. It validates the Gradle Wrapper, runs JVM tests and `assembleDebug` on Linux, then uploads the APK as `MakerTally3D-v0.1-alpha4-android-debug-ci-<run>`. No emulator, Windows build, production signing key, store publishing or GitHub Release is involved.
 
 Alpha limitations: validated on the API 36 AOSP Pixel 7 emulator; older devices and physical hardware still need broader testing. Landscape preserves state but has no special layout. APKs are debug-signed. No stock, slicer import, customers, taxes or new business features were added.
+
+The previous .NET MAUI Windows/Android implementation is preserved at tag `maui-alpha4-final`.
+
+## License
+
+Licensed under the [Apache License 2.0](LICENSE).
 

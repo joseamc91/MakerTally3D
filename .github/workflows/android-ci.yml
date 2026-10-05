@@ -2,9 +2,9 @@ name: Android CI
 on:
   workflow_dispatch:
   push:
-    branches: [android-native]
+    branches: [main, android-native]
   pull_request:
-    branches: [android-native]
+    branches: [main, android-native]
 permissions:
   contents: read
 jobs:
