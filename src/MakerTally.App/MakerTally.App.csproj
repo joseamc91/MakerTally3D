@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net10.0-android;net10.0-windows10.0.19041.0</TargetFrameworks>
+    <!-- Windows CI does not install Android; Core remains a plain net10.0 library. -->
+    <TargetFrameworks Condition="'$(WindowsOnly)' == 'true'">net10.0-windows10.0.19041.0</TargetFrameworks>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>MakerTally.App</RootNamespace>
+    <AssemblyName>MakerTally</AssemblyName>
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+    <MauiVersion>10.0.20</MauiVersion>
+    <ApplicationTitle>MakerTally 3D</ApplicationTitle>
+    <Description>3D Printing Cost Calculator</Description>
+    <Product>MakerTally 3D</Product>
+    <ApplicationId>com.joseamc91.makertally</ApplicationId>
+    <!-- WinUI package versions require numbers; informational metadata and UI carry alpha.4. -->
+    <ApplicationDisplayVersion>0.1.0</ApplicationDisplayVersion>
+    <ApplicationVersion>4</ApplicationVersion>
+    <InformationalVersion>0.1.0-alpha.4</InformationalVersion>
+    <WindowsPackageType>None</WindowsPackageType>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifierOverride)' != ''">$(RuntimeIdentifierOverride)</RuntimeIdentifier>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+    <ApplicationDisplayVersion>0.1.0-alpha.4</ApplicationDisplayVersion>
+    <!-- The debug APK must run independently of IDE fast deployment. -->
+    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+  </PropertyGroup>
+  <ItemGroup>
+    <MauiIcon Include="Resources/AppIcon/appicon.svg" Color="#285DB7" />
+    <MauiSplashScreen Include="Resources/Splash/splash.svg" Color="#F3F5F9" BaseSize="96,96" />
+    <MauiFont Include="Resources/Fonts/*.ttf" />
+    <EmbeddedResource Include="Resources/Localization/*.json" LogicalName="MakerTally.Strings.%(Filename).json" />
+    <ProjectReference Include="../MakerTally.Core/MakerTally.Core.csproj" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+  </ItemGroup>
+</Project>

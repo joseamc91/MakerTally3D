@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:MakerTally.App.Controls" xmlns:core="clr-namespace:MakerTally.Core;assembly=MakerTally.Core" xmlns:vm="clr-namespace:MakerTally.App.Presentation.ViewModels" x:Class="MakerTally.App.Views.SettingsView" x:DataType="vm:MainViewModel">
+  <ScrollView Orientation="Vertical">
+    <VerticalStackLayout Padding="{StaticResource CompactPagePadding}" Spacing="12">
+      <Label Text="{local:LocalizedText Settings}" Style="{StaticResource CompactPageTitle}"/>
+      <Label Text="{local:LocalizedText Application}" Style="{StaticResource Section}"/>
+      <BoxView HeightRequest="1" Color="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource DarkOutline}}"/>
+      <Grid ColumnDefinitions="90,*" ColumnSpacing="8">
+        <Label Text="{local:LocalizedText LanguageShort}" VerticalOptions="Center"/>
+        <Border Grid.Column="1" Style="{StaticResource FieldBorder}">
+          <Picker ItemsSource="{Binding LanguageNames}" SelectedIndex="{Binding SelectedLanguageIndex, Mode=TwoWay}" SemanticProperties.Description="{local:LocalizedText Language}" AutomationId="LanguageSelector"/>
+        </Border>
+      </Grid>
+      <Grid ColumnDefinitions="90,*" ColumnSpacing="8">
+        <Label Text="{local:LocalizedText Theme}" VerticalOptions="Center"/>
+        <Border Grid.Column="1" Style="{StaticResource FieldBorder}">
+          <Picker ItemsSource="{Binding ThemeNames}" SelectedIndex="{Binding SelectedThemeIndex, Mode=TwoWay}" SemanticProperties.Description="{local:LocalizedText Theme}" AutomationId="ThemeSelector"/>
+        </Border>
+      </Grid>
+      <Label Text="{local:LocalizedText CalculationShort}" Style="{StaticResource Section}" Margin="0,4,0,0"/>
+      <BoxView HeightRequest="1" Color="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource DarkOutline}}"/>
+      <local:NumericInputView Field="{Binding ElectricityPrice}" LabelText="{local:LocalizedText ElectricityPrice}" InputId="ElectricityPriceInput"/>
+      <VerticalStackLayout Spacing="4">
+        <Label Text="{local:LocalizedText HeatingPower}" Style="{StaticResource FieldLabel}"/>
+        <Grid ColumnDefinitions="48,*,48" ColumnSpacing="8">
+          <Button Text="{local:LocalizedText MinusGlyph}" Command="{Binding DecreaseHeatingPowerCommand}" Style="{StaticResource CompactStepButton}" SemanticProperties.Description="{local:LocalizedText HeatingPowerDecrease}" AutomationId="DecreaseHeatingPower"/>
+          <Label Grid.Column="1" Text="{Binding HeatingPowerSummary}" Style="{StaticResource CompactSettingValue}" HorizontalOptions="Center" VerticalOptions="Center"/>
+          <Button Grid.Column="2" Text="{local:LocalizedText PlusGlyph}" Command="{Binding IncreaseHeatingPowerCommand}" Style="{StaticResource CompactStepButton}" SemanticProperties.Description="{local:LocalizedText HeatingPowerIncrease}" AutomationId="IncreaseHeatingPower"/>
+        </Grid>
+      </VerticalStackLayout>
+      <VerticalStackLayout Spacing="4">
+        <Label Text="{local:LocalizedText HeatingTime}" Style="{StaticResource FieldLabel}"/>
+        <Grid ColumnDefinitions="48,*,48" ColumnSpacing="8">
+          <Button Text="{local:LocalizedText MinusGlyph}" Command="{Binding DecreaseHeatingTimeCommand}" Style="{StaticResource CompactStepButton}" SemanticProperties.Description="{local:LocalizedText HeatingTimeDecrease}" AutomationId="DecreaseHeatingTime"/>
+          <Label Grid.Column="1" Text="{Binding HeatingTimeSummary}" Style="{StaticResource CompactSettingValue}" HorizontalOptions="Center" VerticalOptions="Center"/>
+          <Button Grid.Column="2" Text="{local:LocalizedText PlusGlyph}" Command="{Binding IncreaseHeatingTimeCommand}" Style="{StaticResource CompactStepButton}" SemanticProperties.Description="{local:LocalizedText HeatingTimeIncrease}" AutomationId="IncreaseHeatingTime"/>
+        </Grid>
+      </VerticalStackLayout>
+      <VerticalStackLayout Spacing="4">
+        <Label Text="{local:LocalizedText MachineRate}" Style="{StaticResource FieldLabel}"/>
+        <Grid ColumnDefinitions="48,*,48" ColumnSpacing="8">
+          <Button Text="{local:LocalizedText MinusGlyph}" Command="{Binding DecreaseMachineRateCommand}" Style="{StaticResource CompactStepButton}" SemanticProperties.Description="{local:LocalizedText MachineRateDecrease}" AutomationId="DecreaseMachineRate"/>
+          <Label Grid.Column="1" Text="{Binding MachineSummary}" Style="{StaticResource CompactSettingValue}" HorizontalOptions="Center" VerticalOptions="Center"/>
+          <Button Grid.Column="2" Text="{local:LocalizedText PlusGlyph}" Command="{Binding IncreaseMachineRateCommand}" Style="{StaticResource CompactStepButton}" SemanticProperties.Description="{local:LocalizedText MachineRateIncrease}" AutomationId="IncreaseMachineRate"/>
+        </Grid>
+      </VerticalStackLayout>
+      <VerticalStackLayout Spacing="4">
+        <Label Text="{local:LocalizedText SaleMultiplier}" Style="{StaticResource FieldLabel}"/>
+        <Grid ColumnDefinitions="48,*,48" ColumnSpacing="8">
+          <Button Text="{local:LocalizedText MinusGlyph}" Command="{Binding DecreaseMultiplierCommand}" Style="{StaticResource CompactStepButton}" SemanticProperties.Description="{local:LocalizedText DecreaseMultiplier}" AutomationId="DecreaseMultiplier"/>
+          <Label Grid.Column="1" Text="{Binding MultiplierText}" Style="{StaticResource CompactSettingValue}" HorizontalOptions="Center" VerticalOptions="Center"/>
+          <Button Grid.Column="2" Text="{local:LocalizedText PlusGlyph}" Command="{Binding IncreaseMultiplierCommand}" Style="{StaticResource CompactStepButton}" SemanticProperties.Description="{local:LocalizedText IncreaseMultiplier}" AutomationId="IncreaseMultiplier"/>
+        </Grid>
+      </VerticalStackLayout>
+      <Label Text="{Binding MultiplierNotice}" IsVisible="{Binding HasLegacyMultiplier}" Style="{StaticResource Helper}"/>
+      <Label Text="{Binding SettingsStatus}" Style="{StaticResource Helper}"/>
+      <Label Text="{Binding VersionFooter}" Style="{StaticResource Helper}" Margin="0,4,0,4"/>
+    </VerticalStackLayout>
+  </ScrollView>
+</ContentView>

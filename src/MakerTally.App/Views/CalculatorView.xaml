@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:MakerTally.App.Controls" xmlns:core="clr-namespace:MakerTally.Core;assembly=MakerTally.Core" xmlns:vm="clr-namespace:MakerTally.App.Presentation.ViewModels" x:Class="MakerTally.App.Views.CalculatorView" x:DataType="vm:MainViewModel">
+  <ScrollView Orientation="Vertical">
+    <VerticalStackLayout Padding="{StaticResource CompactPagePadding}" Spacing="10">
+      <Label Text="{local:LocalizedText Calculator}" Style="{StaticResource CompactPageTitle}"/>
+      <Border Style="{StaticResource CompactCard}" BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource DarkPrimaryContainer}}">
+        <VerticalStackLayout Spacing="2">
+          <Label Text="{local:LocalizedText SalePrice}" Style="{StaticResource Section}"/>
+          <Label Text="{Binding SalePrice}" FontSize="{StaticResource SaleHeroSize}" FontFamily="{StaticResource StrongFont}" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource DarkPrimary}}" AutomationId="SuggestedSalePrice"/>
+        </VerticalStackLayout>
+      </Border>
+      <Border Style="{StaticResource CompactCard}">
+        <VerticalStackLayout Spacing="8">
+          <Label Text="{local:LocalizedText NewPrint}" Style="{StaticResource Section}"/>
+          <VerticalStackLayout Spacing="4">
+            <Label Text="{local:LocalizedText Filament}" Style="{StaticResource FieldLabel}"/>
+            <Border Style="{StaticResource FieldBorder}">
+              <Picker ItemsSource="{Binding ActiveFilaments}" ItemDisplayBinding="{Binding DisplayName, x:DataType=core:FilamentProfile}" SelectedItem="{Binding SelectedFilament, Mode=TwoWay}" SemanticProperties.Description="{local:LocalizedText Filament}" AutomationId="FilamentSelector"/>
+            </Border>
+          </VerticalStackLayout>
+          <local:NumericInputView Field="{Binding Weight}" LabelText="{local:LocalizedText PieceWeight}" InputId="PieceWeightInput"/>
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+            <local:NumericInputView Field="{Binding Hours}" LabelText="{local:LocalizedText HoursInput}" InputId="PrintHoursInput"/>
+            <local:NumericInputView Grid.Column="1" Field="{Binding Minutes}" LabelText="{local:LocalizedText MinutesInput}" InputId="PrintMinutesInput"/>
+          </Grid>
+          <Label Text="{Binding CalculationMessage}" IsVisible="{Binding HasInvalidCalculation}" Style="{StaticResource ErrorLabel}"/>
+        </VerticalStackLayout>
+      </Border>
+      <Border Style="{StaticResource CompactCard}">
+        <VerticalStackLayout Spacing="6">
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <Label Text="{local:LocalizedText PieceCost}" Style="{StaticResource Section}" VerticalOptions="Center"/>
+            <Label Grid.Column="1" Text="{Binding PieceCost}" Style="{StaticResource Section}" VerticalOptions="Center"/>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <Label Text="{local:LocalizedText Material}" Style="{StaticResource BodyLabel}" VerticalOptions="Center"/>
+            <Label Grid.Column="1" Text="{Binding MaterialCost}" Style="{StaticResource BodyLabel}" VerticalOptions="Center"/>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <Label Text="{local:LocalizedText Electricity}" Style="{StaticResource BodyLabel}" VerticalOptions="Center"/>
+            <Label Grid.Column="1" Text="{Binding ElectricityCost}" Style="{StaticResource BodyLabel}" VerticalOptions="Center"/>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <Label Text="{local:LocalizedText AdditionalMachine}" Style="{StaticResource Helper}" VerticalOptions="Center"/>
+            <Label Grid.Column="1" Text="{Binding MachineCost}" Style="{StaticResource Helper}" VerticalOptions="Center"/>
+          </Grid>
+        </VerticalStackLayout>
+      </Border>
+      <Grid ColumnDefinitions="*,Auto" HeightRequest="48" Padding="8,0">
+        <Button Grid.ColumnSpan="2" Command="{Binding ToggleDetailsCommand}" Style="{StaticResource DetailsRowButton}" SemanticProperties.Description="{Binding DetailsToggleText}" AutomationId="ToggleCalculationDetails"/>
+        <Label Text="{local:LocalizedText TechnicalDetails}" InputTransparent="True" VerticalOptions="Center"/>
+        <Label Grid.Column="1" Text="{Binding DetailsChevron}" InputTransparent="True" Style="{StaticResource DetailsChevron}" VerticalOptions="Center"/>
+      </Grid>
+      <Border Style="{StaticResource CompactCard}" IsVisible="{Binding DetailsExpanded}" AutomationId="CalculationDetails">
+        <VerticalStackLayout Spacing="8">
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <Label Text="{local:LocalizedText PriceGram}" Style="{StaticResource FieldLabel}" VerticalOptions="Center"/>
+            <Label Grid.Column="1" Text="{Binding PricePerGram}" Style="{StaticResource FieldLabel}" VerticalOptions="Center"/>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <Label Text="{local:LocalizedText HeatingEnergy}" Style="{StaticResource FieldLabel}" VerticalOptions="Center"/>
+            <Label Grid.Column="1" Text="{Binding HeatingEnergy}" Style="{StaticResource FieldLabel}" VerticalOptions="Center"/>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <Label Text="{local:LocalizedText PrintingEnergy}" Style="{StaticResource FieldLabel}" VerticalOptions="Center"/>
+            <Label Grid.Column="1" Text="{Binding PrintingEnergy}" Style="{StaticResource FieldLabel}" VerticalOptions="Center"/>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <Label Text="{local:LocalizedText TotalEnergy}" Style="{StaticResource FieldLabel}" VerticalOptions="Center"/>
+            <Label Grid.Column="1" Text="{Binding TotalEnergy}" Style="{StaticResource FieldLabel}" VerticalOptions="Center"/>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <Label Text="{local:LocalizedText PreciseElectricity}" Style="{StaticResource FieldLabel}" VerticalOptions="Center"/>
+            <Label Grid.Column="1" Text="{Binding PreciseElectricity}" Style="{StaticResource FieldLabel}" VerticalOptions="Center"/>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <Label Text="{local:LocalizedText PrecisePieceCost}" Style="{StaticResource FieldLabel}" VerticalOptions="Center"/>
+            <Label Grid.Column="1" Text="{Binding PrecisePieceCost}" Style="{StaticResource FieldLabel}" VerticalOptions="Center"/>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <Label Text="{local:LocalizedText MachineRate}" Style="{StaticResource FieldLabel}" VerticalOptions="Center"/>
+            <Label Grid.Column="1" Text="{Binding MachineSummary}" Style="{StaticResource FieldLabel}" VerticalOptions="Center"/>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <Label Text="{local:LocalizedText MultiplierUsed}" Style="{StaticResource FieldLabel}" VerticalOptions="Center"/>
+            <Label Grid.Column="1" Text="{Binding MultiplierText}" Style="{StaticResource FieldLabel}" VerticalOptions="Center"/>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <Label Text="{local:LocalizedText GrossMargin}" Style="{StaticResource FieldLabel}" VerticalOptions="Center"/>
+            <Label Grid.Column="1" Text="{Binding Profit}" Style="{StaticResource FieldLabel}" VerticalOptions="Center"/>
+          </Grid>
+        </VerticalStackLayout>
+      </Border>
+    </VerticalStackLayout>
+  </ScrollView>
+</ContentView>

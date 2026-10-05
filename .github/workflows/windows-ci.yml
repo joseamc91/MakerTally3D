@@ -1,0 +1,102 @@
+name: Windows CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      WindowsTfm: net10.0-windows10.0.19041.0
+      AppProject: src/MakerTally.App/MakerTally.App.csproj
+      TestProject: tests/MakerTally.Tests/MakerTally.Tests.csproj
+      PublishDirectory: artifacts/windows-x64
+      ArtifactName: MakerTally3D-v0.1-alpha4-win-x64-ci-${{ github.run_number }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET from global.json
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          global-json-file: global.json
+
+      - name: Install only MAUI Windows workload
+        run: dotnet workload install maui-windows --skip-manifest-update
+
+      - name: Show selected SDK and workloads
+        run: |
+          dotnet --info
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet workload list
+
+      - name: Restore shared tests
+        run: dotnet restore $env:TestProject
+
+      - name: Restore only Windows app target
+        run: dotnet restore $env:AppProject -p:WindowsOnly=true -p:RuntimeIdentifierOverride=win-x64
+
+      - name: Run shared unit tests (required)
+        run: |
+          dotnet test $env:TestProject -c Release --no-restore --logger "trx;LogFileName=tests.trx" --results-directory artifacts/test-results
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          [xml]$results = Get-Content -LiteralPath artifacts/test-results/tests.trx -Raw
+          $counters = $results.TestRun.ResultSummary.Counters
+          if ([int]$counters.executed -lt 1 -or [int]$counters.failed -ne 0 -or [int]$counters.passed -ne [int]$counters.total) {
+            throw 'All discovered tests must execute and pass; an empty or skipped suite is not accepted.'
+          }
+          "Tests passed: $($counters.passed) / $($counters.total)" >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Build Windows Release x64
+        run: dotnet build $env:AppProject -c Release -f $env:WindowsTfm -p:WindowsOnly=true -p:RuntimeIdentifierOverride=win-x64 --no-restore
+
+      - name: Publish complete self-contained Windows folder
+        run: dotnet publish $env:AppProject -c Release -f $env:WindowsTfm -p:WindowsOnly=true -p:RuntimeIdentifierOverride=win-x64 --self-contained true -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true -p:PublishTrimmed=false -o $env:PublishDirectory
+
+      - name: Zip complete publication and calculate SHA-256
+        run: |
+          if (!(Test-Path -LiteralPath "$env:PublishDirectory/MakerTally.exe")) { throw 'MakerTally.exe is missing from the publication.' }
+          $zip = "artifacts/$env:ArtifactName.zip"
+          Compress-Archive -Path "$env:PublishDirectory/*" -DestinationPath $zip -CompressionLevel Optimal
+          $hash = Get-FileHash -LiteralPath $zip -Algorithm SHA256
+          "$($hash.Hash.ToLowerInvariant())  $env:ArtifactName.zip" | Set-Content -LiteralPath "artifacts/$env:ArtifactName.sha256" -Encoding utf8
+          "Windows artifact: $env:ArtifactName" >> $env:GITHUB_STEP_SUMMARY
+          'Extract every file from the Windows ZIP and launch MakerTally.exe manually. No installer, Release, tag or code signing is created.' >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Upload Windows ZIP
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: ${{ env.ArtifactName }}
+          path: |
+            artifacts/${{ env.ArtifactName }}.zip
+            artifacts/${{ env.ArtifactName }}.sha256
+          compression-level: 0
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Upload test results even on failure
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: MakerTally3D-tests-${{ github.run_number }}
+          path: artifacts/test-results/*.trx
+          retention-days: 14
+          if-no-files-found: warn

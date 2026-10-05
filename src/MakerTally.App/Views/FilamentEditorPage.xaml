@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:MakerTally.App.Controls" xmlns:vm="clr-namespace:MakerTally.App.Presentation.ViewModels" x:Class="MakerTally.App.Views.FilamentEditorPage" x:DataType="vm:FilamentEditorViewModel" Title="{Binding Title}" BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource DarkBackground}}">
+  <Grid Padding="{StaticResource PagePadding}" RowDefinitions="*,Auto" RowSpacing="{StaticResource Gap}" MaximumWidthRequest="840" HorizontalOptions="Fill">
+    <ScrollView Orientation="Vertical">
+      <VerticalStackLayout Spacing="{StaticResource Gap}">
+        <Label Text="{Binding Title}" Style="{StaticResource PageTitle}"/>
+        <Label Text="{local:LocalizedText EditorSubtitle}" Style="{StaticResource Subtitle}"/>
+        <Border Style="{StaticResource Card}">
+          <VerticalStackLayout Spacing="12">
+            <local:AdaptiveGrid MaximumColumns="2" ColumnSpacing="{StaticResource Gap}" RowSpacing="{StaticResource Gap}">
+              <VerticalStackLayout Spacing="6"><Label Text="{local:LocalizedText MaterialType}" Style="{StaticResource FieldLabel}"/><Border Style="{StaticResource FieldBorder}"><Entry Text="{Binding MaterialType, Mode=TwoWay}" Placeholder="{local:LocalizedText TypePlaceholder}" SemanticProperties.Description="{local:LocalizedText MaterialType}" AutomationId="FilamentMaterialTypeInput"/></Border><Label Text="{Binding TypeError}" IsVisible="{Binding HasTypeError}" Style="{StaticResource ErrorLabel}"/></VerticalStackLayout>
+              <VerticalStackLayout Spacing="6"><Label Text="{local:LocalizedText Brand}" Style="{StaticResource FieldLabel}"/><Border Style="{StaticResource FieldBorder}"><Entry Text="{Binding Brand, Mode=TwoWay}" Placeholder="{local:LocalizedText BrandPlaceholder}" SemanticProperties.Description="{local:LocalizedText Brand}" AutomationId="FilamentBrandInput"/></Border><Label Text="{Binding BrandError}" IsVisible="{Binding HasBrandError}" Style="{StaticResource ErrorLabel}"/></VerticalStackLayout>
+              <VerticalStackLayout Spacing="6"><Label Text="{local:LocalizedText Variant}" Style="{StaticResource FieldLabel}"/><Border Style="{StaticResource FieldBorder}"><Entry Text="{Binding Variant, Mode=TwoWay}" Placeholder="{local:LocalizedText VariantPlaceholder}" SemanticProperties.Description="{local:LocalizedText Variant}" AutomationId="FilamentVariantInput"/></Border></VerticalStackLayout>
+              <local:NumericInputView Field="{Binding Power}" LabelText="{local:LocalizedText PrintPower}" InputId="FilamentPowerInput"/>
+              <local:NumericInputView Field="{Binding Weight}" LabelText="{local:LocalizedText SpoolWeight}" InputId="FilamentWeightInput"/>
+              <local:NumericInputView Field="{Binding Price}" LabelText="{local:LocalizedText PurchasePrice}" InputId="FilamentPriceInput"/>
+            </local:AdaptiveGrid>
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12"><Label Text="{local:LocalizedText PriceKg}" Style="{StaticResource FieldLabel}"/><Label Grid.Column="1" Text="{Binding PricePerKg}"  VerticalOptions="Center"/></Grid>
+          </VerticalStackLayout>
+        </Border>
+      </VerticalStackLayout>
+    </ScrollView>
+    <HorizontalStackLayout Grid.Row="1" HorizontalOptions="End" Spacing="{StaticResource Gap}">
+      <Button Text="{local:LocalizedText Cancel}" Style="{StaticResource SecondaryButton}" Clicked="CancelClicked"/>
+      <Button Text="{local:LocalizedText Save}" Command="{Binding SaveCommand}" AutomationId="SaveFilament"/>
+    </HorizontalStackLayout>
+  </Grid>
+</ContentPage>

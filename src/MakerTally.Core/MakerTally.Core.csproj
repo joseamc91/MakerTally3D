@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>MakerTally.Core</RootNamespace>
+    <AssemblyName>MakerTally.Core</AssemblyName>
+  </PropertyGroup>
+</Project>

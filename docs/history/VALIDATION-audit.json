@@ -1,0 +1,114 @@
+{
+  "version": "0.1.0-alpha.3",
+  "baseline_version": "0.1.0-alpha.2",
+  "git_available": false,
+  "baseline_tests": 48,
+  "active_tests_passed": 84,
+  "failed_tests": 0,
+  "skipped_tests": 0,
+  "language_keys": 135,
+  "visible_xaml_literals": [],
+  "missing_resource_keys": [],
+  "windows_references_in_shared_code": [],
+  "windows_build_warnings": 0,
+  "windows_build_errors": 0,
+  "windows_artifact_matches_current_ready_to_run_publish": true,
+  "android_compiled_in_alpha3": false,
+  "android_runtime_reviewed_in_alpha3": false,
+  "source_changes": {
+    "added": [
+      "README-alpha2.md",
+      "VALIDATION-alpha2.md",
+      "VALIDATION-audit-alpha2.json",
+      "src/PrintCost.App/Platforms/Windows/AppTheme.cs",
+      "src/PrintCost.Core/ExcelRounding.cs",
+      "src/PrintCost.Core/LegacyFilamentMigration.cs",
+      "src/PrintCost.Core/PrintDuration.cs",
+      "tests/PrintCost.Tests/Alpha3Tests.cs"
+    ],
+    "removed": [],
+    "modified": [
+      "Directory.Build.props",
+      "README.md",
+      "VALIDATION.md",
+      "src/PrintCost.App/App.xaml.cs",
+      "src/PrintCost.App/Controls/NumericInputView.xaml",
+      "src/PrintCost.App/MainPage.xaml",
+      "src/PrintCost.App/Platforms/Windows/App.xaml",
+      "src/PrintCost.App/Platforms/Windows/Package.appxmanifest",
+      "src/PrintCost.App/Presentation/ViewModels/FilamentCardViewModel.cs",
+      "src/PrintCost.App/Presentation/ViewModels/FilamentEditorViewModel.cs",
+      "src/PrintCost.App/Presentation/ViewModels/MainViewModel.cs",
+      "src/PrintCost.App/Presentation/ViewModels/NumericField.cs",
+      "src/PrintCost.App/PrintCost.App.csproj",
+      "src/PrintCost.App/Resources/Localization/en-US.json",
+      "src/PrintCost.App/Resources/Localization/es-ES.json",
+      "src/PrintCost.App/Resources/Styles/Theme.xaml",
+      "src/PrintCost.App/Services/PageDialogs.cs",
+      "src/PrintCost.App/Views/CalculatorView.xaml",
+      "src/PrintCost.App/Views/FilamentEditorPage.xaml",
+      "src/PrintCost.App/Views/InventoryView.xaml",
+      "src/PrintCost.App/Views/SettingsView.xaml",
+      "src/PrintCost.App/Views/SettingsView.xaml.cs",
+      "src/PrintCost.Core/JsonDataStore.cs",
+      "src/PrintCost.Core/Models.cs",
+      "src/PrintCost.Core/PrintCostCalculationService.cs",
+      "tests/PrintCost.Tests/CalculationTests.cs",
+      "tests/PrintCost.Tests/CompatibilityTests.cs",
+      "tests/PrintCost.Tests/PresentationTests.cs"
+    ],
+    "unchanged_count": 65
+  },
+  "asa_reference_euros": {
+    "material": "2.4675",
+    "electricity": "0.14839",
+    "piece": "2.61589",
+    "machine": "1.50",
+    "raw_sale": "9.34767",
+    "sale": "9.35",
+    "raw_gross_margin": "5.23411",
+    "gross_margin": "5.24"
+  },
+  "visual_windows_sizes": [
+    "1100x760",
+    "1024x700",
+    "800x700",
+    "740x700 (additional)"
+  ],
+  "themes_reviewed": [
+    "System (current OS dark)",
+    "Light",
+    "Dark"
+  ],
+  "languages_reviewed": [
+    "es-ES",
+    "en-US"
+  ],
+  "roundup_review": {
+    "algorithm_changed": false,
+    "actual_modes": [
+      "ToPositiveInfinity (nonnegative)",
+      "ToNegativeInfinity (negative)"
+    ],
+    "uses_midpoint_away_from_zero": false,
+    "explicit_cases": {
+      "9.34000": "9.34",
+      "9.34001": "9.35",
+      "9.34101": "9.35",
+      "9.34767": "9.35",
+      "9.34999": "9.35",
+      "9.35000": "9.35",
+      "5.23000": "5.23",
+      "5.23001": "5.24",
+      "5.23411": "5.24"
+    },
+    "total_tests_passed": 84,
+    "tests_failed_or_skipped": 0,
+    "ui_changed": false,
+    "android_compiled": false,
+    "version_changed": false,
+    "windows_archive_rebuilt": false,
+    "test_log": "work/alpha3-roundup-tests.log",
+    "test_results": "work/alpha3-roundup-test-results/alpha3-roundup.trx"
+  }
+}

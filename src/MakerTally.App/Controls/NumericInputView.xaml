@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+ xmlns:local="clr-namespace:MakerTally.App.Controls"
+ x:Class="MakerTally.App.Controls.NumericInputView" x:Name="Root">
+ <VerticalStackLayout BindingContext="{x:Reference Root}" x:DataType="local:NumericInputView" Spacing="6">
+  <Label Text="{Binding LabelText}" Style="{StaticResource FieldLabel}" />
+  <Border Style="{StaticResource FieldBorder}">
+   <Border.Triggers><DataTrigger TargetType="Border" Binding="{Binding Field.HasErrors}" Value="True"><Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource DarkError}}" /></DataTrigger></Border.Triggers>
+   <Entry Text="{Binding Field.Text, Mode=TwoWay}" Keyboard="Numeric"
+    SemanticProperties.Description="{Binding LabelText}" AutomationId="{Binding InputId}" />
+  </Border>
+  <Label Text="{Binding Field.ErrorText}" IsVisible="{Binding Field.HasErrors}" Style="{StaticResource ErrorLabel}" />
+ </VerticalStackLayout>
+</ContentView>

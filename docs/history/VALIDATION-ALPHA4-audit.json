@@ -1,0 +1,122 @@
+{
+  "version": "0.1.0-alpha.4",
+  "baseline_version": "0.1.0-alpha.3",
+  "git_available": false,
+  "baseline_tests_passed": 84,
+  "existing_cases_retained": 84,
+  "new_cases_prepared": 14,
+  "expected_current_cases": 98,
+  "after_tests_executed": false,
+  "after_tests_passed": null,
+  "execution_blocker": "Windows Application Control FileLoadException 0x800711C7 before test discovery and PrintCost startup",
+  "windows_build_errors": 0,
+  "windows_build_warnings": 0,
+  "windows_publish_success": true,
+  "windows_startup_validated": false,
+  "windows_requested_visual_sizes_pending": [
+    "450x760",
+    "400x700",
+    "500x800",
+    "800x800"
+  ],
+  "themes_visual_validation_pending": [
+    "System",
+    "Light",
+    "Dark"
+  ],
+  "languages_visual_validation_pending": [
+    "es-ES",
+    "en-US"
+  ],
+  "window_geometry_runtime_validation_pending": true,
+  "initial_window_size_dip": [
+    450,
+    760
+  ],
+  "minimum_window_size_dip": [
+    400,
+    560
+  ],
+  "content_max_width_dip": 520,
+  "core_source_unchanged": [
+    "src/PrintCost.Core/ExcelRounding.cs",
+    "src/PrintCost.Core/IAppDataStorage.cs",
+    "src/PrintCost.Core/JsonDataStore.cs",
+    "src/PrintCost.Core/LegacyFilamentMigration.cs",
+    "src/PrintCost.Core/Models.cs",
+    "src/PrintCost.Core/NumericInput.cs",
+    "src/PrintCost.Core/PrintCost.Core.csproj",
+    "src/PrintCost.Core/PrintCostCalculationService.cs",
+    "src/PrintCost.Core/PrintDuration.cs"
+  ],
+  "math_storage_compatibility_test_sources_unchanged": [
+    "tests/PrintCost.Tests/Alpha3Tests.cs",
+    "tests/PrintCost.Tests/CalculationTests.cs",
+    "tests/PrintCost.Tests/InputTests.cs",
+    "tests/PrintCost.Tests/CompatibilityTests.cs",
+    "tests/PrintCost.Tests/StorageTests.cs"
+  ],
+  "existing_vm_methods_unchanged": true,
+  "existing_localization_behavior_unchanged": true,
+  "android_platform_source_unchanged": true,
+  "language_keys": 149,
+  "visible_xaml_literals": [],
+  "missing_resource_keys": [],
+  "windows_apis_in_shared_source": [],
+  "android_compiled_in_alpha4": false,
+  "android_installs_or_downloads_in_alpha4": false,
+  "android_inspected_after_windows_work": {
+    "workload": "maui-android 10.0.20/10.0.100",
+    "android_pack": "36.1.69",
+    "sdk": "work/android-sdk",
+    "platform": "android-36",
+    "build_tools": "36.0.0",
+    "platform_tools": "36.0.0",
+    "command_line_tools": "latest",
+    "local_jdk": "Microsoft 17.0.14",
+    "system_java_home": "Eclipse Adoptium 25.0.4.101",
+    "emulator_detected": false,
+    "avds_detected": [],
+    "adb_devices": [],
+    "alpha4_android_build_validated": false
+  },
+  "asa_reference_from_unchanged_logic": {
+    "material": "2.4675",
+    "electricity": "0.14839",
+    "piece": "2.61589",
+    "machine": "1.50",
+    "sale": "9.35",
+    "gross_margin": "5.24"
+  },
+  "source_changes": {
+    "added": [
+      "README-alpha3.md",
+      "VALIDATION-ALPHA4.md",
+      "src/PrintCost.App/Platforms/Windows/WindowPlacement.cs",
+      "src/PrintCost.App/Presentation/ViewModels/MainViewModel.CompactSettings.cs",
+      "tests/PrintCost.Tests/CompactUtilityTests.cs"
+    ],
+    "removed": [],
+    "modified": [
+      "Directory.Build.props",
+      "README.md",
+      "src/PrintCost.App/MainPage.xaml",
+      "src/PrintCost.App/MainPage.xaml.cs",
+      "src/PrintCost.App/Platforms/Windows/Package.appxmanifest",
+      "src/PrintCost.App/Platforms/Windows/PlatformWindow.cs",
+      "src/PrintCost.App/Presentation/ViewModels/MainViewModel.cs",
+      "src/PrintCost.App/PrintCost.App.csproj",
+      "src/PrintCost.App/Resources/Localization/en-US.json",
+      "src/PrintCost.App/Resources/Localization/es-ES.json",
+      "src/PrintCost.App/Resources/Styles/Theme.xaml",
+      "src/PrintCost.App/Views/CalculatorView.xaml",
+      "src/PrintCost.App/Views/InventoryView.xaml",
+      "src/PrintCost.App/Views/InventoryView.xaml.cs",
+      "src/PrintCost.App/Views/SettingsView.xaml",
+      "tests/PrintCost.Tests/PresentationTests.cs",
+      "tests/PrintCost.Tests/PrintCost.Tests.csproj"
+    ],
+    "unchanged_count": 86
+  },
+  "acceptance_complete": false
+}
