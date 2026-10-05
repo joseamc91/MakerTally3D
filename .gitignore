@@ -1,47 +1,23 @@
-# .NET / Visual Studio / MAUI generated files
-**/bin/
-**/obj/
-.vs/
+.gradle/
+.kotlin/
 .idea/
-**/TestResults/
-outputs/
+**/build/
+.local/
+local.properties
+*.iml
 artifacts/
-.work/
-packages/
-*.user
-*.suo
-*.userosscache
-*.sln.docstates
-*.cache
+outputs/
 *.log
-*.trx
 *.tmp
-*.zip
 *.apk
 *.aab
-*.msix
-*.msixbundle
-*.appx
-*.appxbundle
-
-# Local user data must never become repository content.
-**/settings.json
-**/filaments.json
-**/window.json
-*.invalid
-
-# Local credentials, signing material and environment files
+*.zip
+*.keystore
+*.jks
 .env
 .env.*
-!.env.example
 *.pfx
 *.p12
 *.key
-*.keystore
-*.jks
-local.properties
-
-# OS/editor files
 Thumbs.db
-Desktop.ini
 .DS_Store
