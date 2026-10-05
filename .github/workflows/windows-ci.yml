@@ -52,7 +52,7 @@ jobs:
         run: dotnet restore $env:TestProject
 
       - name: Restore only Windows app target
-        run: dotnet restore $env:AppProject -p:WindowsOnly=true -p:RuntimeIdentifierOverride=win-x64
+        run: dotnet restore $env:AppProject -p:Configuration=Release -p:WindowsOnly=true -r win-x64 -p:RuntimeIdentifierOverride=win-x64 -p:SelfContained=true -p:WindowsAppSDKSelfContained=true -p:WindowsPackageType=None -p:PublishTrimmed=false
 
       - name: Run shared unit tests (required)
         run: |
@@ -66,10 +66,10 @@ jobs:
           "Tests passed: $($counters.passed) / $($counters.total)" >> $env:GITHUB_STEP_SUMMARY
 
       - name: Build Windows Release x64
-        run: dotnet build $env:AppProject -c Release -f $env:WindowsTfm -p:WindowsOnly=true -p:RuntimeIdentifierOverride=win-x64 --no-restore
+        run: dotnet build $env:AppProject -c Release -f $env:WindowsTfm -p:WindowsOnly=true -r win-x64 -p:RuntimeIdentifierOverride=win-x64 --self-contained true -p:WindowsAppSDKSelfContained=true -p:WindowsPackageType=None -p:PublishTrimmed=false --no-restore
 
       - name: Publish complete self-contained Windows folder
-        run: dotnet publish $env:AppProject -c Release -f $env:WindowsTfm -p:WindowsOnly=true -p:RuntimeIdentifierOverride=win-x64 --self-contained true -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true -p:PublishTrimmed=false -o $env:PublishDirectory
+        run: dotnet publish $env:AppProject -c Release -f $env:WindowsTfm -p:WindowsOnly=true -r win-x64 -p:RuntimeIdentifierOverride=win-x64 --self-contained true -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true -p:PublishTrimmed=false --no-restore -o $env:PublishDirectory
 
       - name: Zip complete publication and calculate SHA-256
         run: |

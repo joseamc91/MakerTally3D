@@ -71,3 +71,5 @@ Pushing main triggers Windows CI; its result must be inspected before declaring 
 ## First CI finding
 
 Run 1 executed all 107 tests: 106 passed and the existing alpha4 stepper-boundary test failed. At decimal.MaxValue, subtracting the fractional 0.05 step can round back to MaxValue, incorrectly enabling increase. The guard now explicitly excludes MaxValue in addition to its existing overflow check. This is the only non-branding correction in presentation logic; the original assertion is retained. Pricing, ROUNDUP, normal step sizes, UI and JSON behavior are unchanged. A subsequent CI run must pass before a Windows artifact is accepted.
+
+Run 2 passed all 107 tests with no skips, then exposed NETSDK1112 in the clean runner: restore had not downloaded the x64 runtime required by the build. The workflow now explicitly uses Release, win-x64 and self-contained settings consistently for restore, build and publish. This changes CI commands only, not app behavior. Publish uses the same restored assets with --no-restore.

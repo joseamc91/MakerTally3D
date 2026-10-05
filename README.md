@@ -75,9 +75,9 @@ SDK .NET 10 y workload `maui-windows`. `global.json` conserva la configuración 
 dotnet workload install maui-windows
 dotnet restore tests/MakerTally.Tests/MakerTally.Tests.csproj
 dotnet test tests/MakerTally.Tests/MakerTally.Tests.csproj -c Release
-dotnet restore src/MakerTally.App/MakerTally.App.csproj -p:WindowsOnly=true -p:RuntimeIdentifierOverride=win-x64
-dotnet build src/MakerTally.App/MakerTally.App.csproj -c Release -f net10.0-windows10.0.19041.0 -p:WindowsOnly=true -p:RuntimeIdentifierOverride=win-x64 --no-restore
-dotnet publish src/MakerTally.App/MakerTally.App.csproj -c Release -f net10.0-windows10.0.19041.0 -p:WindowsOnly=true -p:RuntimeIdentifierOverride=win-x64 --self-contained true -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true -p:PublishTrimmed=false -o artifacts/windows-x64
+dotnet restore src/MakerTally.App/MakerTally.App.csproj -p:Configuration=Release -p:WindowsOnly=true -r win-x64 -p:RuntimeIdentifierOverride=win-x64 -p:SelfContained=true -p:WindowsAppSDKSelfContained=true -p:WindowsPackageType=None -p:PublishTrimmed=false
+dotnet build src/MakerTally.App/MakerTally.App.csproj -c Release -f net10.0-windows10.0.19041.0 -p:WindowsOnly=true -r win-x64 -p:RuntimeIdentifierOverride=win-x64 --self-contained true -p:WindowsAppSDKSelfContained=true -p:WindowsPackageType=None -p:PublishTrimmed=false --no-restore
+dotnet publish src/MakerTally.App/MakerTally.App.csproj -c Release -f net10.0-windows10.0.19041.0 -p:WindowsOnly=true -r win-x64 -p:RuntimeIdentifierOverride=win-x64 --self-contained true -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true -p:PublishTrimmed=false --no-restore -o artifacts/windows-x64
 ```
 
 `WindowsOnly=true` selecciona solo el target Windows **dentro del proyecto App**, sin propagar un TargetFrameworks Windows a Core. Sin este selector se mantienen Windows y Android reales. No ejecutar restore de la solución multitarget completa para una tarea Windows.
