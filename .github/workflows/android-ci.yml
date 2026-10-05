@@ -1,0 +1,42 @@
+name: Android CI
+on:
+  workflow_dispatch:
+  push:
+    branches: [android-native]
+  pull_request:
+    branches: [android-native]
+permissions:
+  contents: read
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up JDK
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v6
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+      - name: Install API 36 build components
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Unit tests
+        run: ./gradlew testDebugUnitTest --console=plain
+      - name: Assemble debug APK
+        run: ./gradlew assembleDebug --console=plain
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-unit-test-reports-${{ github.run_number }}
+          path: app/build/test-results/testDebugUnitTest/*.xml
+          if-no-files-found: warn
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: MakerTally3D-v0.1-alpha4-android-debug-ci-${{ github.run_number }}
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
