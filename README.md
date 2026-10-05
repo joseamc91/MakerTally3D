@@ -90,7 +90,7 @@ Se conservan los **98 casos** anteriores y se añaden **9 casos de migración**,
 
 La build Windows Release desde la ubicación nueva termina con **0 errores y 0 avisos**. Los tests compilan; su único intento local de ejecución fue bloqueado por Windows Application Control al cargar `MakerTally.Tests.dll`, código `0x800711C7`, antes de descubrir los casos. No se declaran 107 tests aprobados; no se realizan reintentos, excepciones de seguridad ni cambios de políticas. Las 84 pruebas aprobadas corresponden a la referencia anterior a alpha4.
 
-La revisión visual alpha4 y la migración real al arrancar en este PC siguen pendientes de poder ejecutar la app. No se compila Android ni se modifica su infraestructura. La auditoría de fuentes comprueba que UI/cálculos/ROUNDUP y tests matemáticos solo difieren en identificadores de marca necesarios; los datos del perfil del usuario no se han tocado.
+La revisión visual alpha4 y la migración real al arrancar en este PC siguen pendientes de poder ejecutar la app. No se compila Android ni se modifica su infraestructura. La auditoría de fuentes comprueba que UI/cálculos/ROUNDUP y tests matemáticos solo difieren en identificadores de marca necesarios; los datos del perfil del usuario no se han tocado. El primer CI detectó además un fallo preexistente de alpha4: el stepper de máquina seguía habilitado en decimal.MaxValue porque restar 0,05 a ese extremo puede redondear al mismo valor. Se añade únicamente una comprobación explícita del límite; se conserva el test original, sin modificar fórmulas, pasos ni uso normal.
 
 ## GitHub Actions Windows
 

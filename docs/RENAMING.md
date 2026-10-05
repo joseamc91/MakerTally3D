@@ -67,3 +67,7 @@ GitHub CLI is installed and authenticated as `joseamc91`. After explicit authori
 The reviewed workflow uses windows-latest, official actions pinned to commit SHAs, a read-only token, global.json, only maui-windows, mandatory non-empty/all-passing tests, build/publish, a full ZIP with SHA-256 and artifact upload. Triggered by manual dispatch, push main and pull_request main. Test results upload even on failure. Static YAML and embedded PowerShell validation are separate from actual execution; real results and logs are available in [Windows CI](https://github.com/joseamc91/MakerTally3D/actions/workflows/windows-ci.yml).
 
 Pushing main triggers Windows CI; its result must be inspected before declaring tests or publication successful. It will name its build `MakerTally3D-v0.1-alpha4-win-x64-ci-<run_number>`. The user will download/run the artifact manually. No release or alpha5 is started.
+
+## First CI finding
+
+Run 1 executed all 107 tests: 106 passed and the existing alpha4 stepper-boundary test failed. At decimal.MaxValue, subtracting the fractional 0.05 step can round back to MaxValue, incorrectly enabling increase. The guard now explicitly excludes MaxValue in addition to its existing overflow check. This is the only non-branding correction in presentation logic; the original assertion is retained. Pricing, ROUNDUP, normal step sizes, UI and JSON behavior are unchanged. A subsequent CI run must pass before a Windows artifact is accepted.

@@ -16,7 +16,10 @@ public sealed partial class MainViewModel
 
     private RelayCommand SettingCommand(NumericField field, decimal step)
     {
-        bool CanStep() => !field.HasErrors && (step > 0 ? field.Value <= decimal.MaxValue - step : field.Value > 0);
+        // Subtracting a fractional step from decimal.MaxValue can round back to MaxValue.
+        bool CanStep() => !field.HasErrors && (step > 0
+            ? field.Value < decimal.MaxValue && field.Value <= decimal.MaxValue - step
+            : field.Value > 0);
         return new(() =>
         {
             if (CanStep()) field.Text = _language.Number(Math.Max(0m, field.Value + step), "0.############################");
