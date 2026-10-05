@@ -61,8 +61,9 @@ ASA eSun reference (141 g, 6 h, original defaults): material 2.4675, electricity
 
 ## Validation and CI
 
-The original 107 MAUI cases are individually classified in [the audit](docs/MAUI-TEST-AUDIT.csv), with behavior recorded in [the migration contract](docs/ANDROID-MIGRATION-CONTRACT.md). Relevant behavior is tested in Kotlin without artificially duplicating the original test count. Windows monitor/geometry/migration and MAUI notification infrastructure are intentionally absent.
+The original 107 MAUI cases are individually classified in [the audit](docs/MAUI-TEST-AUDIT.csv), with behavior recorded in [the migration contract](docs/ANDROID-MIGRATION-CONTRACT.md). 48 JVM tests cover the relevant behavior without artificially duplicating the original xUnit case count. Emulator results and known tooling warnings are recorded in [the validation report](docs/ANDROID-VALIDATION.md). Windows monitor/geometry/migration and MAUI notification infrastructure are intentionally absent.
 
 Android CI runs wrapper validation, JVM tests and `assembleDebug` on Linux, then uploads the APK as `MakerTally3D-v0.1-alpha4-android-debug-ci-<run>`. No emulator, Windows build, signing key, store publishing or Release is involved.
 
 Alpha limitations: validated on the API 36 AOSP Pixel 7 emulator; older devices and physical hardware still need broader testing. Landscape preserves state but has no special layout. APKs are debug-signed. No stock, slicer import, customers, taxes or new business features were added.
+
