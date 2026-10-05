@@ -18,6 +18,18 @@ private class FakeRepository : AppRepository {
 }
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class ViewModelTests {
+    @Test fun sortPreferencePersistsWithoutChangingCalculationsAndFailedSaveKeepsPreviousMode() = check { model,repo ->
+        val result=model.state.value.result
+        model.sort(FilamentSort.PriceAscending);model.language("en-US");model.theme(ThemeMode.Dark);runCurrent()
+        assertEquals(FilamentSort.PriceAscending,repo.settings.filamentSort)
+        assertEquals(FilamentSort.PriceAscending,model.state.value.settings.filamentSort)
+        assertEquals(result,model.state.value.result)
+        val recreated=MakerTallyViewModel(repo);runCurrent()
+        assertEquals(FilamentSort.PriceAscending,recreated.state.value.settings.filamentSort)
+        repo.fail=true;model.sort(FilamentSort.PriceDescending);runCurrent()
+        assertEquals(FilamentSort.PriceAscending,model.state.value.settings.filamentSort)
+        assertEquals(StorageNotice.SaveFailed,model.state.value.notice)
+    }
     private fun check(block:suspend TestScope.(MakerTallyViewModel,FakeRepository)->Unit)=runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try { val repo=FakeRepository();val model=MakerTallyViewModel(repo);runCurrent();block(model,repo) }

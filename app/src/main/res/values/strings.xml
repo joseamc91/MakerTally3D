@@ -49,7 +49,13 @@
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
-    <string name="inactive">Inactive</string>
+    <string name="inactive">INACTIVE</string>
+    <string name="sort_filaments">Sort filaments</string>
+    <string name="sort_name">Name A–Z</string>
+    <string name="sort_price_ascending">€/kg: low to high</string>
+    <string name="sort_price_descending">€/kg: high to low</string>
+    <string name="expanded">Expanded</string>
+    <string name="collapsed">Collapsed</string>
     <string name="paid_price">Paid price</string>
     <string name="delete_title">Delete filament?</string>
     <string name="delete_message">This profile will be removed from your library.</string>
@@ -62,8 +68,7 @@
     <string name="active">Active</string>
     <string name="price_per_kg">Price per kg</string>
     <string name="required_fields">Complete the required fields with valid values.</string>
-    <string name="application">Application</string>
-    <string name="calculation">Calculation</string>
+    <string name="calculation">Calculator settings</string>
     <string name="language">Language</string>
     <string name="spanish">Español</string>
     <string name="english">English</string>

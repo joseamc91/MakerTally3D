@@ -9,7 +9,7 @@ This private migration branch is `android-native`. The last .NET MAUI Windows/An
 ## Functionality
 
 - Calculator: filament, piece weight, whole hours and minutes (0–59), live suggested price, piece/material/electricity/additional-machine costs and collapsed technical details.
-- Filaments: seven original profiles; add/edit/activate/deactivate/delete with confirmation, exact spool pricing and calculated €/kg. No stock tracking.
+- Filaments: seven original profiles; add/edit/activate/deactivate/delete with confirmation, exact spool pricing and calculated €/kg. Active profiles always precede inactive profiles; name or ascending/descending €/kg order is remembered. No stock tracking.
 - Settings: Spanish/English per-app locale; System/Light/Dark themes; manual electricity price; heating power ±100 W, heating time ±1 min, machine rate ±€0.05/hour, multiplier ±0.5 (minimum 1). Other steppers stop at zero.
 - Dot/comma numeric input; invalid temporary input never crashes or produces a misleading calculation.
 
@@ -61,7 +61,7 @@ ASA eSun reference (141 g, 6 h, original defaults): material 2.4675, electricity
 
 ## Validation and CI
 
-The original 107 MAUI cases are individually classified in [the audit](docs/MAUI-TEST-AUDIT.csv), with behavior recorded in [the migration contract](docs/ANDROID-MIGRATION-CONTRACT.md). 48 JVM tests cover the relevant behavior without artificially duplicating the original xUnit case count. Emulator results and known tooling warnings are recorded in [the validation report](docs/ANDROID-VALIDATION.md). Windows monitor/geometry/migration and MAUI notification infrastructure are intentionally absent.
+The original 107 MAUI cases are individually classified in [the audit](docs/MAUI-TEST-AUDIT.csv), with behavior recorded in [the migration contract](docs/ANDROID-MIGRATION-CONTRACT.md). The initial 48 JVM tests remain intact; nine UX ordering/preferences regression tests bring the total to 57. Emulator results and known tooling warnings are recorded in [the migration validation report](docs/ANDROID-VALIDATION.md) and [the alpha4 UX polish report](docs/UX-POLISH-ALPHA4.md). Windows monitor/geometry/migration and MAUI notification infrastructure are intentionally absent.
 
 Android CI runs wrapper validation, JVM tests and `assembleDebug` on Linux, then uploads the APK as `MakerTally3D-v0.1-alpha4-android-debug-ci-<run>`. No emulator, Windows build, signing key, store publishing or Release is involved.
 

@@ -73,6 +73,7 @@ class MakerTallyViewModel(private val repository: AppRepository, private val sav
     }
     fun language(language: String) = changeSettings { it.copy(language = language) }
     fun theme(theme: ThemeMode) = changeSettings { it.copy(theme = theme) }
+    fun sort(mode: FilamentSort) = changeSettings { it.copy(filamentSort = mode) }
     fun step(setting: SettingStep, up: Boolean) {
         changeSettings { settings ->
             fun next(value: BigDecimal, delta: String, minimum: BigDecimal = BigDecimal.ZERO) =

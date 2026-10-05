@@ -5,18 +5,32 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -29,6 +43,7 @@ import com.joseamc91.makertally.R
 import com.joseamc91.makertally.data.StorageNotice
 import com.joseamc91.makertally.domain.*
 import java.math.BigDecimal
+import kotlin.math.roundToInt
 
 private val lightColors = lightColorScheme(primary=Color(0xFF205DBC), onPrimary=Color.White,
     primaryContainer=Color(0xFFDCE8FF),onPrimaryContainer=Color(0xFF15315C),
@@ -105,8 +120,8 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
     }
 }
 @Composable private fun PageTitle(resource:Int) { Text(stringResource(resource),style=MaterialTheme.typography.headlineSmall,fontWeight=FontWeight.SemiBold) }
-@Composable private fun SoftCard(content:@Composable ColumnScope.()->Unit) {
-    Card(Modifier.fillMaxWidth(),shape=RoundedCornerShape(18.dp),colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.surface)) {
+@Composable private fun SoftCard(modifier:Modifier=Modifier,content:@Composable ColumnScope.()->Unit) {
+    Card(modifier.fillMaxWidth(),shape=RoundedCornerShape(18.dp),colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.surface)) {
         Column(Modifier.padding(16.dp),verticalArrangement=Arrangement.spacedBy(10.dp),content=content)
     }
 }
@@ -118,17 +133,52 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
             fontWeight=if(important)FontWeight.Bold else FontWeight.Medium,color=if(secondary)MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface)
     }
 }
-@Composable private fun NumberInput(value:String,onChange:(String)->Unit,label:Int,unit:Int?,tag:String,error:Boolean=false,errorLabel:Int=R.string.valid_number,integer:Boolean=false,modifier:Modifier=Modifier) {
-    OutlinedTextField(value=value,onValueChange=onChange,label={Text(stringResource(label))},singleLine=true,
+@Composable private fun NumberInput(value:String,onChange:(String)->Unit,label:Int,unit:Int?,tag:String,error:Boolean=false,errorLabel:Int=R.string.valid_number,integer:Boolean=false,modifier:Modifier=Modifier,nextFocus:FocusRequester?=null) {
+    val focusManager=LocalFocusManager.current
+    val keyboard=LocalSoftwareKeyboardController.current
+    var editing by remember { mutableStateOf(TextFieldValue(value)) }
+    var focused by remember { mutableStateOf(false) }
+    LaunchedEffect(value) {
+        if(editing.text!=value) editing=TextFieldValue(value,TextRange(value.length))
+    }
+    LaunchedEffect(focused) {
+        if(focused) {
+            withFrameNanos { }
+            editing=editing.copy(selection=TextRange(0,editing.text.length))
+        }
+    }
+    OutlinedTextField(value=editing,onValueChange={
+        val changed=editing.text!=it.text
+        editing=it
+        if(changed)onChange(it.text)
+    },label={Text(stringResource(label))},singleLine=true,
         suffix=unit?.let{{Text(stringResource(it))}},isError=error,
         supportingText=if(error){{Text(stringResource(errorLabel))}}else null,
-        keyboardOptions=KeyboardOptions(keyboardType=if(integer)KeyboardType.Number else KeyboardType.Decimal),
-        shape=RoundedCornerShape(12.dp),modifier=modifier.fillMaxWidth().testTag(tag))
+        keyboardOptions=KeyboardOptions(keyboardType=if(integer)KeyboardType.Number else KeyboardType.Decimal,
+            imeAction=if(nextFocus!=null)ImeAction.Next else ImeAction.Done),
+        keyboardActions=KeyboardActions(onNext={nextFocus?.requestFocus()},onDone={focusManager.clearFocus();keyboard?.hide()}),
+        shape=RoundedCornerShape(12.dp),modifier=modifier.fillMaxWidth().testTag(tag).onFocusChanged{focused=it.isFocused})
 }
 @Composable private fun CalculatorPage(state:UiState,model:MakerTallyViewModel) {
     val result=state.result;val lang=state.settings.language
+    val scroll=rememberScrollState()
+    val hoursFocus=remember { FocusRequester() };val minutesFocus=remember { FocusRequester() }
+    var viewportHeight by remember { mutableIntStateOf(0) }
+    var detailsTop by remember { mutableIntStateOf(0) }
+    var detailsHeight by remember { mutableIntStateOf(0) }
+    var toggleHeight by remember { mutableIntStateOf(0) }
+    var revealDetails by remember { mutableStateOf(false) }
+    LaunchedEffect(state.detailsOpen,detailsHeight,viewportHeight) {
+        if(revealDetails && state.detailsOpen && detailsHeight>0 && viewportHeight>0) {
+            // Wait for the expanded layout before using the new scroll range.
+            withFrameNanos { }
+            if(detailsTop+toggleHeight+detailsHeight>scroll.value+viewportHeight)
+                scroll.animateScrollTo(detailsTop.coerceIn(0,scroll.maxValue))
+            revealDetails=false
+        }
+    }
     fun money(value:BigDecimal?,places:Int=2)=Formatting.money(value,lang,places)
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),verticalArrangement=Arrangement.spacedBy(14.dp)) {
+    Column(Modifier.fillMaxSize().onSizeChanged{viewportHeight=it.height}.verticalScroll(scroll).padding(16.dp),verticalArrangement=Arrangement.spacedBy(14.dp)) {
         PageTitle(R.string.calculator)
         Card(Modifier.fillMaxWidth(),shape=RoundedCornerShape(20.dp),colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.primaryContainer)) {
             Column(Modifier.padding(horizontal=20.dp,vertical=18.dp)) {
@@ -144,16 +194,16 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
             Box {
                 OutlinedButton(onClick={choosing=true},Modifier.fillMaxWidth().heightIn(min=48.dp).testTag("filament_picker"),shape=RoundedCornerShape(12.dp)) {
                     Text(state.selected?.displayName ?: stringResource(R.string.no_active_filaments),Modifier.weight(1f),maxLines=1,overflow=TextOverflow.Ellipsis)
-                    Text("⌄")
+                    Icon(painterResource(R.drawable.ic_arrow_drop_down),contentDescription=null,modifier=Modifier.size(24.dp))
                 }
                 DropdownMenu(expanded=choosing,onDismissRequest={choosing=false}) {
                     state.filaments.filter{it.active}.forEach { f-> DropdownMenuItem(text={Text(f.displayName)},onClick={model.select(f.id);choosing=false}) }
                 }
             }
-            NumberInput(state.input.weight,{model.input(weight=it)},R.string.piece_weight,R.string.unit_g,"piece_weight",NumericInput.nonNegative(state.input.weight)==null)
+            NumberInput(state.input.weight,{model.input(weight=it)},R.string.piece_weight,R.string.unit_g,"piece_weight",NumericInput.nonNegative(state.input.weight)==null,nextFocus=hoursFocus)
             Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) {
-                NumberInput(state.input.hours,{model.input(hours=it)},R.string.hours,R.string.unit_h,"hours",NumericInput.nonNegative(state.input.hours,integer=true)==null,R.string.whole_hours,true,Modifier.weight(1f))
-                NumberInput(state.input.minutes,{model.input(minutes=it)},R.string.minutes,R.string.unit_min,"minutes",NumericInput.nonNegative(state.input.minutes,integer=true,maximum=59)==null,R.string.minutes_range,true,Modifier.weight(1f))
+                NumberInput(state.input.hours,{model.input(hours=it)},R.string.hours,R.string.unit_h,"hours",NumericInput.nonNegative(state.input.hours,integer=true)==null,R.string.whole_hours,true,Modifier.weight(1f).focusRequester(hoursFocus),nextFocus=minutesFocus)
+                NumberInput(state.input.minutes,{model.input(minutes=it)},R.string.minutes,R.string.unit_min,"minutes",NumericInput.nonNegative(state.input.minutes,integer=true,maximum=59)==null,R.string.minutes_range,true,Modifier.weight(1f).focusRequester(minutesFocus))
             }
             if(result==null) Text(stringResource(R.string.invalid_result),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
         }
@@ -163,12 +213,15 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
             CostRow(R.string.electricity_cost,money(result?.electricityCost))
             CostRow(R.string.machine_additional,money(result?.machineCost),secondary=true)
         }
-        Row(Modifier.fillMaxWidth().heightIn(min=48.dp).clickable(onClick=model::toggleDetails).testTag("details_toggle").padding(horizontal=4.dp),
+        val detailsState=stringResource(if(state.detailsOpen)R.string.expanded else R.string.collapsed)
+        Row(Modifier.fillMaxWidth().heightIn(min=48.dp).onGloballyPositioned{detailsTop=it.positionInParent().y.roundToInt();toggleHeight=it.size.height}
+            .clickable { revealDetails=!state.detailsOpen;if(state.detailsOpen)detailsHeight=0;model.toggleDetails() }
+            .semantics { stateDescription=detailsState }.testTag("details_toggle").padding(horizontal=4.dp),
             verticalAlignment=Alignment.CenterVertically) {
             Text(stringResource(R.string.calculation_details),Modifier.weight(1f),style=MaterialTheme.typography.bodyMedium)
             Text(if(state.detailsOpen)"⌄"else"›",fontSize=24.sp,color=MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        if(state.detailsOpen) SoftCard {
+        if(state.detailsOpen) SoftCard(Modifier.onSizeChanged{detailsHeight=it.height}.testTag("calculation_detail_values")) {
             CostRow(R.string.price_per_gram,money(result?.pricePerGram,4)+stringResource(R.string.unit_per_g))
             listOf(R.string.heating_energy to result?.heatingEnergy,R.string.printing_energy to result?.printingEnergy,R.string.total_energy to result?.totalEnergy).forEach { (label,value)->
                 CostRow(label,if(value==null)"—"else Formatting.number(value,lang)+" "+stringResource(R.string.unit_kwh))
@@ -183,19 +236,47 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
     }
 }
 @Composable private fun FilamentsPage(state:UiState,model:MakerTallyViewModel) {
+    val listState=rememberLazyListState()
+    LaunchedEffect(state.settings.filamentSort) { listState.scrollToItem(0) }
+    val profiles=remember(state.filaments,state.settings.filamentSort,state.settings.language) {
+        orderedFilaments(state.filaments,state.settings.filamentSort,state.settings.language)
+    }
     Column(Modifier.fillMaxSize().padding(horizontal=16.dp)) {
-        Box(Modifier.padding(vertical=16.dp)){PageTitle(R.string.filaments)}
+        Row(Modifier.fillMaxWidth().padding(vertical=8.dp),verticalAlignment=Alignment.CenterVertically) {
+            Box(Modifier.weight(1f)){PageTitle(R.string.filaments)}
+            var sorting by remember { mutableStateOf(false) }
+            Box {
+                IconButton(onClick={sorting=true},modifier=Modifier.size(48.dp).testTag("filament_sort")) {
+                    Icon(painterResource(R.drawable.ic_sort),contentDescription=stringResource(R.string.sort_filaments))
+                }
+                DropdownMenu(expanded=sorting,onDismissRequest={sorting=false}) {
+                    FilamentSort.entries.forEach { mode ->
+                        val selected=state.settings.filamentSort==mode
+                        DropdownMenuItem(text={Text(stringResource(when(mode) {
+                            FilamentSort.Name->R.string.sort_name
+                            FilamentSort.PriceAscending->R.string.sort_price_ascending
+                            FilamentSort.PriceDescending->R.string.sort_price_descending
+                        }))},leadingIcon={Text(if(selected)"✓"else"",Modifier.clearAndSetSemantics { })},
+                            modifier=Modifier.testTag("sort_${mode.name.lowercase()}").semantics{this.selected=selected},
+                            onClick={sorting=false;model.sort(mode)})
+                    }
+                }
+            }
+        }
         Box(Modifier.weight(1f)) {
-            LazyColumn(Modifier.fillMaxSize(),contentPadding=PaddingValues(bottom=96.dp),verticalArrangement=Arrangement.spacedBy(10.dp)) {
+            LazyColumn(Modifier.fillMaxSize(),state=listState,contentPadding=PaddingValues(bottom=96.dp),verticalArrangement=Arrangement.spacedBy(10.dp)) {
                 if(state.filaments.isEmpty()) item { Text(stringResource(R.string.no_filaments)) }
-                items(state.filaments,key={it.id}) { f->
-                    Card(Modifier.fillMaxWidth(),shape=RoundedCornerShape(16.dp),colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.surface)) {
+                items(profiles,key={it.id}) { f->
+                    Card(Modifier.fillMaxWidth().testTag("filament_${f.id}"),shape=RoundedCornerShape(16.dp),colors=CardDefaults.cardColors(
+                        containerColor=if(f.active)MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceContainer,
+                        contentColor=if(f.active)MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant)) {
                         Column(Modifier.padding(start=14.dp,end=10.dp,top=8.dp,bottom=12.dp)) {
                             Row(verticalAlignment=Alignment.CenterVertically) {
                                 Text(f.displayName,Modifier.weight(1f),fontWeight=FontWeight.SemiBold,style=MaterialTheme.typography.titleMedium)
                                 var menu by remember { mutableStateOf(false) }
                                 Box {
-                                    IconButton(onClick={menu=true},modifier=Modifier.size(48.dp).semantics{contentDescription=f.displayName}) { Text("⋮",fontSize=22.sp) }
+                                    val actions=stringResource(R.string.filament_actions)+": "+f.displayName
+                                    IconButton(onClick={menu=true},modifier=Modifier.size(48.dp).testTag("filament_menu_${f.id}").semantics{contentDescription=actions}) { Text("⋮",fontSize=22.sp) }
                                     DropdownMenu(expanded=menu,onDismissRequest={menu=false}) {
                                         DropdownMenuItem(text={Text(stringResource(R.string.edit))},onClick={menu=false;model.edit(f)})
                                         DropdownMenuItem(text={Text(stringResource(if(f.active)R.string.deactivate else R.string.activate))},onClick={menu=false;model.toggleActive(f)})
@@ -203,13 +284,14 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
                                     }
                                 }
                             }
-                            Text(Formatting.number(f.spoolWeight,state.settings.language)+" "+stringResource(R.string.unit_g)+" · "+Formatting.number(f.printPower,state.settings.language)+" "+stringResource(R.string.unit_w),
-                                color=MaterialTheme.colorScheme.onSurfaceVariant,style=MaterialTheme.typography.bodySmall)
+                            Text(if(f.active)Formatting.number(f.spoolWeight,state.settings.language)+" "+stringResource(R.string.unit_g)+" · "+Formatting.number(f.printPower,state.settings.language)+" "+stringResource(R.string.unit_w)
+                                else stringResource(R.string.inactive),
+                                color=MaterialTheme.colorScheme.onSurfaceVariant,style=MaterialTheme.typography.bodySmall,
+                                fontWeight=if(f.active)FontWeight.Normal else FontWeight.Medium)
                             Row(Modifier.fillMaxWidth().padding(top=8.dp),horizontalArrangement=Arrangement.spacedBy(10.dp),verticalAlignment=Alignment.CenterVertically) {
                                 Text(stringResource(R.string.paid_price)+": "+Formatting.money(f.purchasePrice,state.settings.language),Modifier.weight(1f),style=MaterialTheme.typography.bodySmall)
                                 Text(Formatting.money(f.pricePerKg,state.settings.language)+stringResource(R.string.unit_per_kg),fontWeight=FontWeight.Medium,style=MaterialTheme.typography.bodyMedium)
                             }
-                            if(!f.active) Text(stringResource(R.string.inactive),Modifier.padding(top=6.dp),color=MaterialTheme.colorScheme.onSurfaceVariant,style=MaterialTheme.typography.labelSmall)
                         }
                     }
                 }
@@ -223,15 +305,11 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
     val settings=state.settings;val lang=settings.language
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
         PageTitle(R.string.settings)
-        SectionLabel(R.string.application)
-        Row(verticalAlignment=Alignment.CenterVertically) {
-            Text(stringResource(R.string.language),Modifier.weight(1f))
-            var languages by remember { mutableStateOf(false) }
-            Box {
-                TextButton(onClick={languages=true},modifier=Modifier.testTag("language_picker")) { Text(stringResource(if(lang=="es-ES")R.string.spanish else R.string.english)+"  ⌄") }
-                DropdownMenu(expanded=languages,onDismissRequest={languages=false}) {
-                    listOf("es-ES" to R.string.spanish,"en-US" to R.string.english).forEach{(code,title)->DropdownMenuItem(text={Text(stringResource(title))},onClick={languages=false;model.language(code)})}
-                }
+        Text(stringResource(R.string.language),style=MaterialTheme.typography.labelLarge)
+        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+            listOf("es-ES" to R.string.spanish,"en-US" to R.string.english).forEachIndexed { index,(code,title) ->
+                SegmentedButton(selected=lang==code,onClick={model.language(code)},shape=SegmentedButtonDefaults.itemShape(index,2),icon={},
+                    modifier=Modifier.testTag("language_$code")) { Text(stringResource(title)) }
             }
         }
         Text(stringResource(R.string.theme),style=MaterialTheme.typography.labelLarge)
@@ -271,6 +349,8 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
     }
 }
 @Composable private fun EditorDialog(draft:EditorDraft,state:UiState,model:MakerTallyViewModel) {
+    val brandFocus=remember { FocusRequester() };val variantFocus=remember { FocusRequester() }
+    val weightFocus=remember { FocusRequester() };val priceFocus=remember { FocusRequester() };val powerFocus=remember { FocusRequester() }
     Dialog(onDismissRequest=model::closeEditor,properties=DialogProperties(usePlatformDefaultWidth=false)) {
         Surface(Modifier.fillMaxSize().semantics { testTagsAsResourceId=true },color=MaterialTheme.colorScheme.background) {
             Column(Modifier.safeDrawingPadding().imePadding().fillMaxSize()) {
@@ -279,12 +359,15 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
                     TextButton(onClick=model::closeEditor,enabled=!state.saving){Text(stringResource(R.string.cancel))}
                 }
                 Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal=16.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
-                    OutlinedTextField(draft.material,{model.editor(draft.copy(material=it))},label={Text(stringResource(R.string.material_type))},singleLine=true,modifier=Modifier.fillMaxWidth().testTag("filament_material"))
-                    OutlinedTextField(draft.brand,{model.editor(draft.copy(brand=it))},label={Text(stringResource(R.string.brand))},singleLine=true,modifier=Modifier.fillMaxWidth().testTag("filament_brand"))
-                    OutlinedTextField(draft.variant,{model.editor(draft.copy(variant=it))},label={Text(stringResource(R.string.variant))},singleLine=true,modifier=Modifier.fillMaxWidth().testTag("filament_variant"))
-                    NumberInput(draft.weight,{model.editor(draft.copy(weight=it))},R.string.spool_weight,R.string.unit_g,"filament_weight",NumericInput.nonNegative(draft.weight,positive=true)==null)
-                    NumberInput(draft.price,{model.editor(draft.copy(price=it))},R.string.purchase_price,R.string.unit_euro,"filament_price",draft.price.isNotEmpty()&&NumericInput.nonNegative(draft.price)==null)
-                    NumberInput(draft.power,{model.editor(draft.copy(power=it))},R.string.printing_power,R.string.unit_w,"filament_power",NumericInput.nonNegative(draft.power)==null)
+                    OutlinedTextField(draft.material,{model.editor(draft.copy(material=it))},label={Text(stringResource(R.string.material_type))},singleLine=true,
+                        keyboardOptions=KeyboardOptions(imeAction=ImeAction.Next),keyboardActions=KeyboardActions(onNext={brandFocus.requestFocus()}),modifier=Modifier.fillMaxWidth().testTag("filament_material"))
+                    OutlinedTextField(draft.brand,{model.editor(draft.copy(brand=it))},label={Text(stringResource(R.string.brand))},singleLine=true,
+                        keyboardOptions=KeyboardOptions(imeAction=ImeAction.Next),keyboardActions=KeyboardActions(onNext={variantFocus.requestFocus()}),modifier=Modifier.fillMaxWidth().focusRequester(brandFocus).testTag("filament_brand"))
+                    OutlinedTextField(draft.variant,{model.editor(draft.copy(variant=it))},label={Text(stringResource(R.string.variant))},singleLine=true,
+                        keyboardOptions=KeyboardOptions(imeAction=ImeAction.Next),keyboardActions=KeyboardActions(onNext={weightFocus.requestFocus()}),modifier=Modifier.fillMaxWidth().focusRequester(variantFocus).testTag("filament_variant"))
+                    NumberInput(draft.weight,{model.editor(draft.copy(weight=it))},R.string.spool_weight,R.string.unit_g,"filament_weight",NumericInput.nonNegative(draft.weight,positive=true)==null,modifier=Modifier.focusRequester(weightFocus),nextFocus=priceFocus)
+                    NumberInput(draft.price,{model.editor(draft.copy(price=it))},R.string.purchase_price,R.string.unit_euro,"filament_price",draft.price.isNotEmpty()&&NumericInput.nonNegative(draft.price)==null,modifier=Modifier.focusRequester(priceFocus),nextFocus=powerFocus)
+                    NumberInput(draft.power,{model.editor(draft.copy(power=it))},R.string.printing_power,R.string.unit_w,"filament_power",NumericInput.nonNegative(draft.power)==null,modifier=Modifier.focusRequester(powerFocus))
                     Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
                         Text(stringResource(R.string.active),Modifier.weight(1f));Switch(draft.active,{model.editor(draft.copy(active=it))})
                     }

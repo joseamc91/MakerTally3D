@@ -17,6 +17,34 @@ class MemoryFiles : PrivateFiles {
     override fun writeAtomically(name:String,content:String) { if(failWrite)throw IOException("write");data[name]=content }
 }
 class PersistenceTests {
+    @Test fun existingSettingsWithoutSortKeepValuesAndDefaultToNames() {
+        val existing="""{"language":"en-US","theme":"Dark","electricityPrice":"0.123456","saleMultiplier":"3.5"}"""
+        val restored=DataCodec.decodeSettings(existing)
+        assertEquals(FilamentSort.Name,restored.filamentSort)
+        assertEquals("en-US",restored.language);assertEquals(ThemeMode.Dark,restored.theme)
+        assertEquals(decimal("0.123456"),restored.electricityPrice);assertEquals(decimal("3.5"),restored.saleMultiplier)
+    }
+    @Test fun dataStoreReopeningPersistsSortLanguageAndThemeTogether() = runTest {
+        val dir=kotlin.io.path.createTempDirectory("makertally-reopen").toFile()
+        val files=MemoryFiles()
+        var expected=AppSettings()
+        try {
+            // Each pass uses a fresh DataStore instance over the same file, as after app restart.
+            repeat(4) { index ->
+                val scope=CoroutineScope(SupervisorJob()+Dispatchers.IO)
+                try {
+                    val store=PreferenceDataStoreFactory.create(scope=scope,produceFile={File(dir,"settings.preferences_pb")})
+                    val repo=PreferencesRepository(store,files)
+                    assertEquals(expected,repo.load().settings)
+                    if(index<3) {
+                        expected=expected.copy(filamentSort=FilamentSort.entries[index],theme=ThemeMode.entries[index],
+                            language=if(index%2==0)"en-US"else"es-ES")
+                        repo.saveSettings(expected)
+                    }
+                } finally { scope.cancel();scope.coroutineContext[Job]?.join() }
+            }
+        } finally { dir.deleteRecursively() }
+    }
     @Test fun exactJsonRoundTripRetainsDecimalsIdsVariantsAndInactiveProfiles() {
         val settings=AppSettings(language="en-US",theme=ThemeMode.Dark,electricityPrice=decimal("0.134912345678"),saleMultiplier=decimal("0"))
         assertEquals(settings,DataCodec.decodeSettings(DataCodec.encodeSettings(settings)))

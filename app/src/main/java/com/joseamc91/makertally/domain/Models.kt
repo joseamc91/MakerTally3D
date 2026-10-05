@@ -25,6 +25,7 @@ object DecimalSerializer : KSerializer<BigDecimal> {
 }
 
 @Serializable enum class ThemeMode { System, Light, Dark }
+@Serializable enum class FilamentSort { Name, PriceAscending, PriceDescending }
 @Serializable data class AppSettings(
     val language: String = "es-ES",
     val theme: ThemeMode = ThemeMode.System,
@@ -32,7 +33,8 @@ object DecimalSerializer : KSerializer<BigDecimal> {
     val heatingPower: BigDecimal = decimal("1200"),
     val heatingMinutes: BigDecimal = BigDecimal.ONE,
     val machineRate: BigDecimal = decimal("0.25"),
-    val saleMultiplier: BigDecimal = decimal("3")
+    val saleMultiplier: BigDecimal = decimal("3"),
+    val filamentSort: FilamentSort = FilamentSort.Name
 ) {
     fun isValid() = language in listOf("es-ES", "en-US") &&
         listOf(electricityPrice, heatingPower, heatingMinutes, machineRate, saleMultiplier)
