@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.*
@@ -404,10 +405,14 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
             NumberInput(state.electricityTaxText,model::electricityTax,R.string.electricity_taxes,R.string.unit_percent,"electricity_tax",!state.electricityTaxValid,
                 modifier=Modifier.weight(1f).focusRequester(taxFocus))
         }
-        StepRow(R.string.heating_power,Formatting.number(settings.heatingPower,lang)+" "+stringResource(R.string.unit_w),"heating_power",settings.heatingPower>BigDecimal.ZERO,{model.step(SettingStep.HeatingPower,false)},{model.step(SettingStep.HeatingPower,true)})
-        StepRow(R.string.heating_time,Formatting.number(settings.heatingMinutes,lang)+" "+stringResource(R.string.unit_min),"heating_time",settings.heatingMinutes>BigDecimal.ZERO,{model.step(SettingStep.HeatingMinutes,false)},{model.step(SettingStep.HeatingMinutes,true)})
-        StepRow(R.string.machine_rate,Formatting.money(settings.machineRate,lang)+stringResource(R.string.unit_per_h),"machine_rate",settings.machineRate>BigDecimal.ZERO,{model.step(SettingStep.MachineRate,false)},{model.step(SettingStep.MachineRate,true)})
-        StepRow(R.string.sale_multiplier,"×"+Formatting.number(settings.saleMultiplier,lang,1),"multiplier",settings.saleMultiplier>BigDecimal.ONE,{model.step(SettingStep.Multiplier,false)},{model.step(SettingStep.Multiplier,true)})
+        Column(verticalArrangement=Arrangement.spacedBy(10.dp)) {
+            Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min),horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+                StepRow(R.string.heating_power,Formatting.number(settings.heatingPower,lang)+" "+stringResource(R.string.unit_w),"heating_power",settings.heatingPower>BigDecimal.ZERO,{model.step(SettingStep.HeatingPower,false)},{model.step(SettingStep.HeatingPower,true)},Modifier.weight(1f).fillMaxHeight(),compact=true)
+                StepRow(R.string.heating_time,Formatting.number(settings.heatingMinutes,lang)+" "+stringResource(R.string.unit_min),"heating_time",settings.heatingMinutes>BigDecimal.ZERO,{model.step(SettingStep.HeatingMinutes,false)},{model.step(SettingStep.HeatingMinutes,true)},Modifier.weight(1f).fillMaxHeight(),compact=true)
+            }
+            StepRow(R.string.machine_rate,Formatting.money(settings.machineRate,lang)+stringResource(R.string.unit_per_h),"machine_rate",settings.machineRate>BigDecimal.ZERO,{model.step(SettingStep.MachineRate,false)},{model.step(SettingStep.MachineRate,true)})
+            StepRow(R.string.sale_multiplier,"×"+Formatting.number(settings.saleMultiplier,lang,1),"multiplier",settings.saleMultiplier>BigDecimal.ONE,{model.step(SettingStep.Multiplier,false)},{model.step(SettingStep.Multiplier,true)})
+        }
     }
 }
 @Composable private fun SectionLabel(title:Int,action:(@Composable ()->Unit)?=null) {
@@ -419,15 +424,27 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
         HorizontalDivider(color=MaterialTheme.colorScheme.outlineVariant)
     }
 }
-@Composable private fun StepRow(label:Int,value:String,tag:String,canDecrease:Boolean,decrease:()->Unit,increase:()->Unit) {
-    Column(verticalArrangement=Arrangement.spacedBy(2.dp)) {
-        Text(stringResource(label),style=MaterialTheme.typography.labelLarge,color=MaterialTheme.colorScheme.onSurfaceVariant)
+@Composable private fun StepRow(label:Int,value:String,tag:String,canDecrease:Boolean,decrease:()->Unit,increase:()->Unit,modifier:Modifier=Modifier,compact:Boolean=false) {
+    Column(modifier.fillMaxWidth(),verticalArrangement=if(compact)Arrangement.SpaceBetween else Arrangement.spacedBy(2.dp)) {
+        Text(stringResource(label),modifier=if(compact)Modifier.padding(bottom=2.dp)else Modifier,
+            style=MaterialTheme.typography.labelLarge,color=MaterialTheme.colorScheme.onSurfaceVariant,maxLines=2)
         Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
             val down=stringResource(R.string.decrease)+" "+stringResource(label)
             val up=stringResource(R.string.increase)+" "+stringResource(label)
-            FilledTonalIconButton(onClick=decrease,enabled=canDecrease,modifier=Modifier.size(48.dp).testTag("${tag}_minus").semantics{contentDescription=down}){Text("−",fontSize=22.sp)}
-            Text(value,Modifier.weight(1f),textAlign=androidx.compose.ui.text.style.TextAlign.Center,style=MaterialTheme.typography.titleMedium)
-            FilledTonalIconButton(onClick=increase,modifier=Modifier.size(48.dp).testTag("${tag}_plus").semantics{contentDescription=up}){Text("+",fontSize=22.sp)}
+            StepButton("−",decrease,canDecrease,"${tag}_minus",down)
+            Text(value,Modifier.weight(1f),textAlign=TextAlign.Center,
+                style=if(compact)MaterialTheme.typography.titleSmall else MaterialTheme.typography.titleMedium)
+            StepButton("+",increase,true,"${tag}_plus",up)
+        }
+    }
+}
+@Composable private fun StepButton(symbol:String,onClick:()->Unit,enabled:Boolean,tag:String,description:String) {
+    val tones=IconButtonDefaults.filledTonalIconButtonColors()
+    IconButton(onClick=onClick,enabled=enabled,modifier=Modifier.size(48.dp).testTag(tag).semantics{contentDescription=description},
+        colors=IconButtonDefaults.iconButtonColors(containerColor=Color.Transparent,contentColor=tones.contentColor,
+            disabledContainerColor=Color.Transparent,disabledContentColor=tones.disabledContentColor)) {
+        Box(Modifier.size(40.dp).background(if(enabled)tones.containerColor else tones.disabledContainerColor,CircleShape),contentAlignment=Alignment.Center) {
+            Text(symbol,fontSize=22.sp)
         }
     }
 }
