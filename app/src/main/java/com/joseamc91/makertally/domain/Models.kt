@@ -34,9 +34,10 @@ object DecimalSerializer : KSerializer<BigDecimal> {
     val heatingMinutes: BigDecimal = BigDecimal.ONE,
     val machineRate: BigDecimal = decimal("0.25"),
     val saleMultiplier: BigDecimal = decimal("3"),
-    val filamentSort: FilamentSort = FilamentSort.Name
+    val filamentSort: FilamentSort = FilamentSort.Name,
+    val electricityTaxPercent: BigDecimal = BigDecimal.ZERO
 ) {
-    fun isValid() = language in listOf("es-ES", "en-US") &&
+    fun isValid() = language in listOf("es-ES", "en-US") && electricityTaxPercent >= ZERO &&
         listOf(electricityPrice, heatingPower, heatingMinutes, machineRate, saleMultiplier)
             .all { it >= ZERO && it.isSupported() }
 }
@@ -82,6 +83,7 @@ internal data class Ratio(val numerator: BigDecimal, val denominator: BigDecimal
     operator fun plus(other: Ratio) = Ratio(numerator * other.denominator + other.numerator * denominator, denominator * other.denominator)
     operator fun minus(other: Ratio) = Ratio(numerator * other.denominator - other.numerator * denominator, denominator * other.denominator)
     operator fun times(value: BigDecimal) = Ratio(numerator * value, denominator)
+    operator fun times(other: Ratio) = Ratio(numerator * other.numerator, denominator * other.denominator)
     fun decimal(): BigDecimal = try { numerator.divide(denominator) } catch (_: ArithmeticException) {
         numerator.divide(denominator, MathContext.DECIMAL128)
     }
@@ -98,11 +100,13 @@ object ExcelRounding {
 
 object NumericInput {
     private val pattern = Regex("[+-]?(?:[0-9]+(?:[.,][0-9]*)?|[.,][0-9]+)")
-    fun parse(text: String): BigDecimal? {
+    fun parse(text: String, supportedOnly: Boolean = true): BigDecimal? {
         val trimmed = text.trim()
-        if (trimmed.length > 80 || !pattern.matches(trimmed)) return null
-        return trimmed.replace(',', '.').toBigDecimalOrNull()?.takeIf { it.isSupported() }
+        if ((supportedOnly && trimmed.length > 80) || !pattern.matches(trimmed)) return null
+        return trimmed.replace(',', '.').toBigDecimalOrNull()?.takeIf { !supportedOnly || it.isSupported() }
     }
+    // Percentages have no monetary range/scale cap; keep the same tolerant input syntax.
+    fun percentage(text: String): BigDecimal? = parse(text, supportedOnly = false)?.takeIf { it >= ZERO }
     fun nonNegative(text: String, positive: Boolean = false, integer: Boolean = false, maximum: Int? = null): BigDecimal? =
         parse(text)?.takeIf { (if (positive) it > ZERO else it >= ZERO) &&
             (!integer || it.stripTrailingZeros().scale() <= 0) && (maximum == null || it <= maximum.toBigDecimal()) }

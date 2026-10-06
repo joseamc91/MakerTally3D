@@ -18,7 +18,9 @@ class CalculationEngine {
         val heating = Ratio(settings.heatingPower * settings.heatingMinutes, decimal("60000"))
         val printing = Ratio(filament.printPower * duration.totalMinutes, decimal("60000"))
         val energy = heating + printing
-        val electricity = energy * settings.electricityPrice
+        val taxFactor = Ratio(decimal("100") + settings.electricityTaxPercent, decimal("100"))
+        val effectiveElectricityPrice = taxFactor * settings.electricityPrice
+        val electricity = energy * effectiveElectricityPrice
         val piece = material + electricity
         val machine = Ratio(settings.machineRate * duration.totalMinutes, decimal("60"))
         val rawSale = piece * settings.saleMultiplier + machine

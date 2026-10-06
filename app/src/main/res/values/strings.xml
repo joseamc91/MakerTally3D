@@ -4,7 +4,7 @@
     <string name="calculator">Calculator</string>
     <string name="filaments">Filaments</string>
     <string name="settings">Settings</string>
-    <string name="suggested_price">Suggested sale price</string>
+    <string name="suggested_price">Suggested sale\nprice:</string>
     <string name="new_print">New print</string>
     <string name="filament">Filament</string>
     <string name="piece_weight">Piece weight</string>
@@ -89,5 +89,18 @@
     <string name="dismiss">Dismiss</string>
     <string name="input_per_kwh">€/kWh</string>
     <string name="unit_euro">€</string>
+    <string name="electricity_taxes">Taxes</string>
+    <string name="unit_percent" formatted="false">%</string>
+    <string name="help">Help</string>
+    <string name="calculator_help">Calculator help</string>
+    <string name="navigate_back">Back</string>
+    <string name="help_electricity_price" formatted="false">Enter the energy price per kWh. If you know the price before taxes, enter it here and use Taxes to add the applicable percentage. If your price already includes all taxes, leave Taxes at 0 %.\n\nAvoid simply dividing your total bill by the kWh used: the bill may include capacity charges, meter rental and other fixed costs unrelated to a particular print.</string>
+    <string name="help_electricity_taxes">The effective percentage added to the electricity price. If your bill applies several taxes in succession, you can combine them into a single effective percentage.</string>
+    <string name="help_tax_example_title">Illustrative example (Spain)</string>
+    <string name="help_tax_example" formatted="false">If a bill applies 5.11269632 % electricity tax followed by 21 % VAT, the percentages are not simply added.\n\nEffective percentage:\n(1.0511269632 × 1.21 − 1) × 100\n≈ 27.1864 %\n\nA base price of €0.122/kWh would become approximately €0.1552/kWh after those taxes.\n\nAlways check the percentages on your own bill: they can change. This is a calculation example, not tax advice.</string>
+    <string name="help_heating_power">Approximate power consumed while the printer initially heats up. Estimate it using printer specifications, a power meter or a smart plug.</string>
+    <string name="help_heating_time">Approximate time spent heating up before printing. This time and the heating power determine the warm-up energy, which is added to the printing energy.</string>
+    <string name="help_machine_cost">An hourly allowance for printer wear, maintenance and depreciation. It is added after the sale multiplier and is not part of the cost being multiplied.</string>
+    <string name="help_sale_multiplier">Multiplies the piece cost (material + electricity) to obtain the main part of the selling price. Machine cost is added afterwards.\n\nPrice = Piece cost × Multiplier + Machine cost</string>
 </resources>
 

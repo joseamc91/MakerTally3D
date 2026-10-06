@@ -5,6 +5,7 @@ import com.joseamc91.makertally.domain.*
 import androidx.datastore.preferences.core.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.flow.first
 import org.junit.Assert.*
 import org.junit.Test
 import java.io.File
@@ -17,6 +18,31 @@ class MemoryFiles : PrivateFiles {
     override fun writeAtomically(name:String,content:String) { if(failWrite)throw IOException("write");data[name]=content }
 }
 class PersistenceTests {
+    @Test fun taxJsonRoundTripKeepsAllDecimalDigits() {
+        val settings=AppSettings(electricityPrice=decimal("0.122"),
+            electricityTaxPercent=decimal("27.186400000000000000000000000000123456789"))
+        val encoded=DataCodec.encodeSettings(settings)
+        assertTrue(encoded.contains("\"electricityTaxPercent\""))
+        assertEquals(settings,DataCodec.decodeSettings(encoded))
+    }
+    @Test fun legacySettingsWithoutTaxLoadWithoutRecoveryOrChangingExistingValues() = runTest {
+        withRepository { repo,store,files ->
+            val existing="""{"language":"en-US","theme":"Dark","electricityPrice":"0.1349","heatingPower":"1200","heatingMinutes":"1","machineRate":"0.25","saleMultiplier":"3","filamentSort":"PriceDescending"}"""
+            store.edit{it[stringPreferencesKey("settings_json")]=existing}
+            val loaded=repo.load()
+            assertEquals(AppSettings(language="en-US",theme=ThemeMode.Dark,filamentSort=FilamentSort.PriceDescending),loaded.settings)
+            assertTrue(loaded.notices.isEmpty());assertFalse(files.data.containsKey("settings.json.invalid"))
+            assertEquals(existing,store.data.first()[stringPreferencesKey("settings_json")])
+        }
+    }
+    @Test fun dataStorePersistsTaxAndRejectsNegativeTax() = runTest {
+        withRepository { repo,_,_ ->
+            val settings=AppSettings(electricityTaxPercent=decimal("27.186400000000000000000000000000001"))
+            repo.saveSettings(settings);assertEquals(settings,repo.load().settings)
+            assertThrows(IllegalArgumentException::class.java){DataCodec.decodeSettings("""{"electricityTaxPercent":"-1"}""")}
+            assertThrows(IllegalArgumentException::class.java){DataCodec.encodeSettings(settings.copy(electricityTaxPercent=decimal("-1")))}
+        }
+    }
     @Test fun existingSettingsWithoutSortKeepValuesAndDefaultToNames() {
         val existing="""{"language":"en-US","theme":"Dark","electricityPrice":"0.123456","saleMultiplier":"3.5"}"""
         val restored=DataCodec.decodeSettings(existing)

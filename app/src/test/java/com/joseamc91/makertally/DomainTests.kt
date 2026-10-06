@@ -6,6 +6,51 @@ import org.junit.Test
 import java.math.BigDecimal
 
 class DomainTests {
+    @Test fun taxedAsaReferenceKeepsEveryIntermediateExact() {
+        val r=calc(AppSettings(electricityPrice=decimal("0.122"),electricityTaxPercent=decimal("27.1864")))
+        eq("1.10",r.totalEnergy);eq("0.1706841488",r.electricityCost)
+        eq("2.4675",r.materialCost);eq("2.6381841488",r.pieceCost);eq("1.50",r.machineCost)
+        eq("9.4145524464",r.rawSalePrice);eq("9.42",r.suggestedSalePrice)
+        eq("5.2818158512",r.rawGrossMargin);eq("5.29",r.grossMargin)
+        eq("0.155167408",r.electricityCost.divide(r.totalEnergy))
+    }
+    @Test fun zeroTaxIsExactlyTheOriginalElectricityRatio() {
+        val settings=AppSettings(electricityTaxPercent=BigDecimal.ZERO)
+        val duration=PrintDuration(decimal("6"))
+        val legacyEnergy=Ratio(settings.heatingPower*settings.heatingMinutes,decimal("60000"))+
+            Ratio(filament.printPower*duration.totalMinutes,decimal("60000"))
+        assertEquals((legacyEnergy*settings.electricityPrice).decimal(),calc(settings).electricityCost)
+        eq("9.35",calc(settings).suggestedSalePrice);eq("5.24",calc(settings).grossMargin)
+    }
+    @Test fun taxHasNoPercentageCapAndRejectsNegativeValues() {
+        assertEquals(BigDecimal.ZERO,AppSettings().electricityTaxPercent)
+        listOf("0","27.1864","1000",(DECIMAL_LIMIT*decimal("10")).toPlainString(),"1"+"0".repeat(100)).forEach {
+            assertTrue(AppSettings(electricityTaxPercent=decimal(it)).isValid())
+            eq(it,NumericInput.percentage(it)!!)
+        }
+        assertFalse(AppSettings(electricityTaxPercent=decimal("-0.001")).isValid())
+        assertThrows(IllegalArgumentException::class.java){calc(AppSettings(electricityTaxPercent=decimal("-1")))}
+    }
+    @Test fun highPrecisionTaxCannotLoseAThinFractionBeforeRoundUp() {
+        val tax=decimal("0.0000000000000000000000000000000000000001")
+        val settings=AppSettings(electricityPrice=BigDecimal.ONE,electricityTaxPercent=tax,
+            heatingPower=BigDecimal.ZERO,machineRate=BigDecimal.ZERO,saleMultiplier=BigDecimal.ONE)
+        val r=calc(settings,weight="0",h="0",m="1",f=filament.copy(printPower=decimal("600")))
+        val exact=decimal("0.01")*(BigDecimal.ONE+tax.divide(decimal("100")))
+        assertEquals(0,exact.compareTo(r.electricityCost));assertEquals(0,exact.compareTo(r.rawSalePrice))
+        eq("0.02",r.suggestedSalePrice)
+        assertEquals(tax,NumericInput.percentage(tax.toPlainString()))
+    }
+    @Test fun taxInputAcceptsBothSeparatorsButNotIncompleteOrInvalidValues() {
+        listOf("27.1864","27,1864").forEach{eq("27.1864",NumericInput.percentage(it)!!)}
+        listOf("",",",".","-1","abc","1,2.3","1e9").forEach{assertNull(it,NumericInput.percentage(it))}
+    }
+    @Test fun repeatingEnergyCancelsWithTaxBeforeAnyDecimalProjection() {
+        val settings=AppSettings(electricityPrice=BigDecimal.ONE,electricityTaxPercent=decimal("200"),
+            heatingPower=BigDecimal.ZERO,machineRate=BigDecimal.ZERO,saleMultiplier=BigDecimal.ONE)
+        val r=calc(settings,weight="0",h="0",m="1",f=filament.copy(printPower=decimal("200")))
+        eq("0.01",r.electricityCost);eq("0.01",r.suggestedSalePrice);eq("0",r.grossMargin)
+    }
     private val filament = Defaults.filaments().single { it.material == "ASA" }
     private fun calc(settings: AppSettings = AppSettings(), weight: String = "141", h: String = "6", m: String = "0", f: Filament = filament) =
         CalculationEngine().calculate(f, decimal(weight), PrintDuration(decimal(h), decimal(m)), settings)

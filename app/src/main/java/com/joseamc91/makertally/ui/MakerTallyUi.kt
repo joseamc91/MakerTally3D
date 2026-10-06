@@ -11,6 +11,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.activity.compose.BackHandler
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
@@ -21,6 +23,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
@@ -30,6 +33,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -58,6 +63,8 @@ private val darkColors = darkColorScheme(primary=Color(0xFFA8C7FF),onPrimary=Col
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable fun MakerTallyApp(model: MakerTallyViewModel, applyLocale: (String) -> Unit) {
     val state by model.state.collectAsStateWithLifecycle()
+    var helpOpen by rememberSaveable { mutableStateOf(false) }
+    BackHandler(enabled=helpOpen) { helpOpen=false }
     val dark = when(state.settings.theme) { ThemeMode.System -> isSystemInDarkTheme();ThemeMode.Light -> false;ThemeMode.Dark -> true }
     val view=LocalView.current
     SideEffect { (view.context as? Activity)?.window?.let { WindowCompat.getInsetsController(it,view).apply {
@@ -72,7 +79,9 @@ private val darkColors = darkColorScheme(primary=Color(0xFFA8C7FF),onPrimary=Col
                 topBar={
                     TopAppBar(
                         title={
-                            if(state.destination==Destination.Calculator) Row(
+                            if(helpOpen) Text(stringResource(R.string.calculator_help),maxLines=1,overflow=TextOverflow.Ellipsis,
+                                style=MaterialTheme.typography.titleLarge,fontWeight=FontWeight.SemiBold)
+                            else if(state.destination==Destination.Calculator) Row(
                                 verticalAlignment=Alignment.CenterVertically,
                                 horizontalArrangement=Arrangement.spacedBy(10.dp)
                             ) {
@@ -83,9 +92,14 @@ private val darkColors = darkColorScheme(primary=Color(0xFFA8C7FF),onPrimary=Col
                             } else Text(stringResource(state.destination.title()),maxLines=1,overflow=TextOverflow.Ellipsis,
                                 style=MaterialTheme.typography.titleLarge,fontWeight=FontWeight.SemiBold)
                         },
+                        navigationIcon={
+                            if(helpOpen) IconButton(onClick={helpOpen=false},modifier=Modifier.testTag("help_back")) {
+                                Icon(painterResource(R.drawable.ic_arrow_back),contentDescription=stringResource(R.string.navigate_back),tint=MakerTallyWhite)
+                            }
+                        },
                         actions={
-                            if(state.destination==Destination.Filaments) FilamentSortAction(state,model)
-                            else if(state.destination==Destination.Settings) Text(
+                            if(!helpOpen && state.destination==Destination.Filaments) FilamentSortAction(state,model)
+                            else if(!helpOpen && state.destination==Destination.Settings) Text(
                                 stringResource(R.string.alpha_version),
                                 modifier=Modifier.padding(horizontal=12.dp),
                                 style=MaterialTheme.typography.labelSmall,
@@ -101,7 +115,7 @@ private val darkColors = darkColorScheme(primary=Color(0xFFA8C7FF),onPrimary=Col
                 bottomBar={ NavigationBar(containerColor=MakerTallyNavy) {
                     Destination.entries.forEach { destination ->
                         val title=stringResource(destination.title())
-                        NavigationBarItem(selected=state.destination==destination,onClick={model.navigate(destination)},
+                        NavigationBarItem(selected=state.destination==destination,onClick={helpOpen=false;model.navigate(destination)},
                             icon={ NavigationIcon(destination) },label={Text(title,maxLines=1)},
                             colors=NavigationBarItemDefaults.colors(
                                 selectedIconColor=MakerTallyGreen,selectedTextColor=MakerTallyWhite,
@@ -113,10 +127,10 @@ private val darkColors = darkColorScheme(primary=Color(0xFFA8C7FF),onPrimary=Col
                 } }
             ) { insets ->
                 Box(Modifier.padding(insets).consumeWindowInsets(insets).fillMaxSize()) {
-                    when(state.destination) {
+                    if(helpOpen) CalculatorHelpPage() else when(state.destination) {
                         Destination.Calculator -> CalculatorPage(state,model)
                         Destination.Filaments -> FilamentsPage(state,model)
-                        Destination.Settings -> SettingsPage(state,model)
+                        Destination.Settings -> SettingsPage(state,model,onHelp={helpOpen=true})
                     }
                 }
                 state.notice?.let { notice -> AlertDialog(onDismissRequest=model::dismissNotice,
@@ -194,6 +208,35 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
         keyboardActions=KeyboardActions(onNext={nextFocus?.requestFocus()},onDone={focusManager.clearFocus();keyboard?.hide()}),
         shape=RoundedCornerShape(12.dp),modifier=modifier.fillMaxWidth().testTag(tag).onFocusChanged{focused=it.isFocused})
 }
+@Composable private fun SuggestedPriceCard(price:String) {
+    val label=stringResource(R.string.suggested_price)
+    val labelStyle=MaterialTheme.typography.titleSmall
+    val priceStyle=MaterialTheme.typography.displayLarge.copy(fontWeight=FontWeight.Bold)
+    val textMeasurer=rememberTextMeasurer()
+    Card(Modifier.fillMaxWidth(),shape=RoundedCornerShape(20.dp),
+        colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.primaryContainer)) {
+        BoxWithConstraints(Modifier.fillMaxWidth().padding(horizontal=20.dp,vertical=12.dp)) {
+            val available=constraints.maxWidth
+            val labelWidth=textMeasurer.measure(label,style=labelStyle,softWrap=false).size.width
+            val gap=with(LocalDensity.current) { 12.dp.roundToPx() }
+            fun priceWidth(size:Int)=textMeasurer.measure(price,style=priceStyle.copy(fontSize=size.sp,lineHeight=(size+8).sp),softWrap=false).size.width
+            val priceSize=if(labelWidth+gap+priceWidth(48)<=available)48 else 44
+            val horizontal=labelWidth+gap+priceWidth(priceSize)<=available
+            val ink=MaterialTheme.colorScheme.onPrimaryContainer
+            // Keep the regular card horizontal; large accessibility text can use the full width.
+            if(horizontal) Row(Modifier.fillMaxWidth().heightIn(min=60.dp),verticalAlignment=Alignment.CenterVertically,
+                horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+                Text(label,Modifier.weight(1f),style=labelStyle,color=ink,maxLines=2)
+                Text(price,style=priceStyle.copy(fontSize=priceSize.sp,lineHeight=(priceSize+8).sp),
+                    color=ink,textAlign=TextAlign.End,maxLines=1,modifier=Modifier.testTag("suggested_price"))
+            } else Column(Modifier.fillMaxWidth(),verticalArrangement=Arrangement.spacedBy(4.dp)) {
+                Text(label,style=labelStyle,color=ink,maxLines=2)
+                Text(price,style=priceStyle.copy(fontSize=priceSize.sp,lineHeight=(priceSize+8).sp),
+                    color=ink,textAlign=TextAlign.End,maxLines=1,modifier=Modifier.fillMaxWidth().testTag("suggested_price"))
+            }
+        }
+    }
+}
 @Composable private fun CalculatorPage(state:UiState,model:MakerTallyViewModel) {
     val result=state.result;val lang=state.settings.language
     val scroll=rememberScrollState()
@@ -214,13 +257,7 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
     }
     fun money(value:BigDecimal?,places:Int=2)=Formatting.money(value,lang,places)
     Column(Modifier.fillMaxSize().onSizeChanged{viewportHeight=it.height}.verticalScroll(scroll).padding(16.dp),verticalArrangement=Arrangement.spacedBy(14.dp)) {
-        Card(Modifier.fillMaxWidth(),shape=RoundedCornerShape(20.dp),colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.primaryContainer)) {
-            Column(Modifier.padding(horizontal=20.dp,vertical=18.dp)) {
-                Text(stringResource(R.string.suggested_price),style=MaterialTheme.typography.labelLarge,color=MaterialTheme.colorScheme.onPrimaryContainer)
-                Text(money(result?.suggestedSalePrice),fontSize=48.sp,lineHeight=56.sp,fontWeight=FontWeight.Bold,
-                    color=MaterialTheme.colorScheme.onPrimaryContainer,modifier=Modifier.testTag("suggested_price"),maxLines=1)
-            }
-        }
+        SuggestedPriceCard(money(result?.suggestedSalePrice))
         SoftCard {
             Text(stringResource(R.string.new_print),style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.SemiBold)
             var choosing by remember { mutableStateOf(false) }
@@ -334,8 +371,9 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
         }
     }
 }
-@Composable private fun SettingsPage(state:UiState,model:MakerTallyViewModel) {
+@Composable private fun SettingsPage(state:UiState,model:MakerTallyViewModel,onHelp:()->Unit) {
     val settings=state.settings;val lang=settings.language
+    val taxFocus=remember { FocusRequester() }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
         Text(stringResource(R.string.language),style=MaterialTheme.typography.labelLarge)
         SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
@@ -353,17 +391,31 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
                 }
             }
         }
-        SectionLabel(R.string.calculation)
-        NumberInput(state.electricityText,model::electricity,R.string.electricity_price,R.string.input_per_kwh,"electricity",!state.electricityValid)
+        SectionLabel(R.string.calculation) {
+            OutlinedButton(onClick=onHelp,modifier=Modifier.heightIn(min=40.dp).testTag("calculator_help"),
+                contentPadding=PaddingValues(horizontal=12.dp,vertical=8.dp),
+                colors=ButtonDefaults.outlinedButtonColors(contentColor=MaterialTheme.colorScheme.primary)) {
+                Text(stringResource(R.string.help),style=MaterialTheme.typography.labelLarge,fontWeight=FontWeight.Medium)
+            }
+        }
+        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+            NumberInput(state.electricityText,model::electricity,R.string.electricity_price,R.string.input_per_kwh,"electricity",!state.electricityValid,
+                modifier=Modifier.weight(1.7f),nextFocus=taxFocus)
+            NumberInput(state.electricityTaxText,model::electricityTax,R.string.electricity_taxes,R.string.unit_percent,"electricity_tax",!state.electricityTaxValid,
+                modifier=Modifier.weight(1f).focusRequester(taxFocus))
+        }
         StepRow(R.string.heating_power,Formatting.number(settings.heatingPower,lang)+" "+stringResource(R.string.unit_w),"heating_power",settings.heatingPower>BigDecimal.ZERO,{model.step(SettingStep.HeatingPower,false)},{model.step(SettingStep.HeatingPower,true)})
         StepRow(R.string.heating_time,Formatting.number(settings.heatingMinutes,lang)+" "+stringResource(R.string.unit_min),"heating_time",settings.heatingMinutes>BigDecimal.ZERO,{model.step(SettingStep.HeatingMinutes,false)},{model.step(SettingStep.HeatingMinutes,true)})
         StepRow(R.string.machine_rate,Formatting.money(settings.machineRate,lang)+stringResource(R.string.unit_per_h),"machine_rate",settings.machineRate>BigDecimal.ZERO,{model.step(SettingStep.MachineRate,false)},{model.step(SettingStep.MachineRate,true)})
         StepRow(R.string.sale_multiplier,"×"+Formatting.number(settings.saleMultiplier,lang,1),"multiplier",settings.saleMultiplier>BigDecimal.ONE,{model.step(SettingStep.Multiplier,false)},{model.step(SettingStep.Multiplier,true)})
     }
 }
-@Composable private fun SectionLabel(title:Int) {
+@Composable private fun SectionLabel(title:Int,action:(@Composable ()->Unit)?=null) {
     Column(Modifier.padding(top=4.dp),verticalArrangement=Arrangement.spacedBy(8.dp)) {
-        Text(stringResource(title),style=MaterialTheme.typography.titleSmall,fontWeight=FontWeight.SemiBold,color=MaterialTheme.colorScheme.primary)
+        Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
+            Text(stringResource(title),Modifier.weight(1f),style=MaterialTheme.typography.titleSmall,fontWeight=FontWeight.SemiBold,color=MaterialTheme.colorScheme.primary)
+            action?.invoke()
+        }
         HorizontalDivider(color=MaterialTheme.colorScheme.outlineVariant)
     }
 }

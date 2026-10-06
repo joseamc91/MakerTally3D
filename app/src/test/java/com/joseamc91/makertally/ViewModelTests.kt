@@ -18,6 +18,50 @@ private class FakeRepository : AppRepository {
 }
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class ViewModelTests {
+    @Test fun validTaxPersistsAndIsLoadedAfterRestart() = check { model,repo ->
+        model.electricity("0,122");model.electricityTax("27,1864");runCurrent()
+        assertEquals(decimal("27.1864"),repo.settings.electricityTaxPercent)
+        assertEquals("9.42",model.state.value.result!!.suggestedSalePrice.toPlainString())
+        val restarted=MakerTallyViewModel(repo);runCurrent()
+        assertEquals("27,1864",restarted.state.value.electricityTaxText)
+        assertEquals(model.state.value.result,restarted.state.value.result)
+    }
+    @Test fun invalidTaxDoesNotPersistAndResultReturnsWhenCorrected() = check { model,repo ->
+        model.electricityTax("21");runCurrent();val lastValid=repo.settings
+        listOf("",",",".","-1","abc").forEach { text ->
+            model.electricityTax(text);runCurrent()
+            assertEquals(text,model.state.value.electricityTaxText);assertFalse(model.state.value.electricityTaxValid)
+            assertNull(model.state.value.result);assertEquals(lastValid,repo.settings)
+        }
+        model.electricityTax("0");runCurrent()
+        assertTrue(model.state.value.electricityTaxValid);assertEquals("9.35",model.state.value.result!!.suggestedSalePrice.toPlainString())
+    }
+    @Test fun localeChangesBothElectricityInputsWithoutLosingTaxPrecision() = check { _,repo ->
+        val saved=SavedStateHandle();val model=MakerTallyViewModel(repo,saved);runCurrent()
+        val exact=decimal("27.186400000000000000000000000000123456789")
+        model.electricity("0,122");model.electricityTax(exact.toPlainString().replace('.',','));runCurrent()
+        model.language("en-US");runCurrent()
+        assertEquals("0.122",model.state.value.electricityText)
+        assertEquals(exact.toPlainString(),model.state.value.electricityTaxText)
+        assertEquals(exact.toPlainString(),saved.get<String>("electricityTax"));assertEquals(exact,repo.settings.electricityTaxPercent)
+        model.language("es-ES");runCurrent()
+        assertEquals(exact.toPlainString().replace('.',','),model.state.value.electricityTaxText)
+        assertEquals(exact,repo.settings.electricityTaxPercent)
+    }
+    @Test fun savedStateRestoresIncompleteTaxWhileKeepingLastValidSetting() = check { _,repo ->
+        val saved=SavedStateHandle();val model=MakerTallyViewModel(repo,saved);runCurrent()
+        model.electricityTax("27,1864");runCurrent();model.electricityTax(",");runCurrent()
+        val recreated=MakerTallyViewModel(repo,saved);runCurrent()
+        assertEquals(",",recreated.state.value.electricityTaxText);assertNull(recreated.state.value.result)
+        assertEquals(decimal("27.1864"),recreated.state.value.settings.electricityTaxPercent)
+        recreated.language("en-US");runCurrent();assertEquals(",",recreated.state.value.electricityTaxText)
+        recreated.electricityTax("27.1864");runCurrent();assertNotNull(recreated.state.value.result)
+    }
+    @Test fun failedTaxWriteKeepsPersistedSettingAndReportsStorageNotice() = check { model,repo ->
+        repo.fail=true;model.electricityTax("21");runCurrent()
+        assertEquals(AppSettings(),repo.settings);assertEquals(AppSettings(),model.state.value.settings)
+        assertEquals(StorageNotice.SaveFailed,model.state.value.notice)
+    }
     @Test fun sortPreferencePersistsWithoutChangingCalculationsAndFailedSaveKeepsPreviousMode() = check { model,repo ->
         val result=model.state.value.result
         model.sort(FilamentSort.PriceAscending);model.language("en-US");model.theme(ThemeMode.Dark);runCurrent()

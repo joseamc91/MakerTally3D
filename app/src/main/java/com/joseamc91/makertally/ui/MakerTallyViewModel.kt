@@ -22,6 +22,7 @@ data class UiState(
     val selectedId: String? = null,
     val input: CalculatorInput = CalculatorInput(),
     val electricityText: String = "0,1349",
+    val electricityTaxText: String = "0",
     val destination: Destination = Destination.Calculator,
     val detailsOpen: Boolean = false,
     val editor: EditorDraft? = null,
@@ -31,7 +32,8 @@ data class UiState(
 ) {
     val selected get() = preferredFilament(filaments, selectedId)
     val electricityValid get() = NumericInput.nonNegative(electricityText) != null
-    val result get() = input.calculate(selected, settings, electricityValid)
+    val electricityTaxValid get() = NumericInput.percentage(electricityTaxText) != null
+    val result get() = input.calculate(selected, settings, electricityValid && electricityTaxValid)
 }
 
 class MakerTallyViewModel(private val repository: AppRepository, private val saved: SavedStateHandle = SavedStateHandle(), private val platformLanguage: String? = null) : ViewModel() {
@@ -56,6 +58,7 @@ class MakerTallyViewModel(private val repository: AppRepository, private val sav
             _state.value = _state.value.copy(ready = true, settings = loaded.settings, filaments = loaded.filaments,
                 selectedId = selected?.id, input = _state.value.input.localized(loaded.settings.language),
                 electricityText = saved["electricity"] ?: Formatting.input(loaded.settings.electricityPrice, loaded.settings.language),
+                electricityTaxText = saved["electricityTax"] ?: Formatting.input(loaded.settings.electricityTaxPercent, loaded.settings.language),
                 notice = loaded.notices.firstOrNull())
         }
     }
@@ -70,6 +73,11 @@ class MakerTallyViewModel(private val repository: AppRepository, private val sav
         saved["electricity"] = text
         update { it.copy(electricityText = text) }
         NumericInput.nonNegative(text)?.let { value -> changeSettings { it.copy(electricityPrice = value) } }
+    }
+    fun electricityTax(text: String) {
+        saved["electricityTax"] = text
+        update { it.copy(electricityTaxText = text) }
+        NumericInput.percentage(text)?.let { value -> changeSettings { it.copy(electricityTaxPercent = value) } }
     }
     fun language(language: String) = changeSettings { it.copy(language = language) }
     fun theme(theme: ThemeMode) = changeSettings { it.copy(theme = theme) }
@@ -96,8 +104,10 @@ class MakerTallyViewModel(private val repository: AppRepository, private val sav
                     val languageChanged = settings.language != before.settings.language
                     update { current -> current.copy(settings = settings,
                         input = if (languageChanged) current.input.localized(settings.language) else current.input,
-                        electricityText = if (languageChanged) NumericInput.parse(current.electricityText)?.let { Formatting.input(it, settings.language) } ?: current.electricityText else current.electricityText) }
+                        electricityText = if (languageChanged) NumericInput.parse(current.electricityText)?.let { Formatting.input(it, settings.language) } ?: current.electricityText else current.electricityText,
+                        electricityTaxText = if (languageChanged) NumericInput.percentage(current.electricityTaxText)?.let { Formatting.input(it, settings.language) } ?: current.electricityTaxText else current.electricityTaxText) }
                     saved["electricity"] = _state.value.electricityText
+                    saved["electricityTax"] = _state.value.electricityTaxText
                 } catch (_: IOException) { update { it.copy(notice = StorageNotice.SaveFailed) } }
             }
         }

@@ -4,7 +4,7 @@
     <string name="calculator">Calculadora</string>
     <string name="filaments">Filamentos</string>
     <string name="settings">Ajustes</string>
-    <string name="suggested_price">Precio de venta sugerido</string>
+    <string name="suggested_price">Precio de venta\nsugerido:</string>
     <string name="new_print">Nueva impresión</string>
     <string name="filament">Filamento</string>
     <string name="piece_weight">Peso de la pieza</string>
@@ -89,5 +89,18 @@
     <string name="dismiss">Cerrar</string>
     <string name="input_per_kwh">€/kWh</string>
     <string name="unit_euro">€</string>
+    <string name="electricity_taxes">Impuestos</string>
+    <string name="unit_percent" formatted="false">%</string>
+    <string name="help">Ayuda</string>
+    <string name="calculator_help">Ayuda de la calculadora</string>
+    <string name="navigate_back">Volver</string>
+    <string name="help_electricity_price" formatted="false">Introduce el precio de la energía por kWh. Si conoces el precio antes de impuestos, introdúcelo aquí y utiliza Impuestos para añadir el porcentaje correspondiente. Si el precio ya incluye todos los impuestos, deja Impuestos en 0 %.\n\nEvita dividir simplemente el total de la factura entre los kWh: puede incluir potencia contratada, alquiler del contador y otros costes fijos que no dependen de una impresión concreta.</string>
+    <string name="help_electricity_taxes">Porcentaje efectivo que se añade al precio de la electricidad. Si tu factura aplica varios impuestos sucesivos, puedes combinarlos en un único porcentaje efectivo.</string>
+    <string name="help_tax_example_title">Ejemplo ilustrativo (España)</string>
+    <string name="help_tax_example" formatted="false">Si una factura aplica un 5,11269632 % de impuesto eléctrico y después un 21 % de IVA, los porcentajes no se suman directamente.\n\nPorcentaje efectivo:\n(1,0511269632 × 1,21 − 1) × 100\n≈ 27,1864 %\n\nUn precio base de 0,122 €/kWh daría aproximadamente 0,1552 €/kWh después de esos impuestos.\n\nComprueba siempre los porcentajes de tu propia factura: pueden cambiar. Es un ejemplo de cálculo, no asesoramiento fiscal.</string>
+    <string name="help_heating_power">Potencia aproximada consumida durante el calentamiento inicial de la impresora. Puedes estimarla con las especificaciones, un medidor de consumo o un enchufe inteligente.</string>
+    <string name="help_heating_time">Tiempo aproximado de calentamiento antes de imprimir. Este tiempo y la potencia de calentamiento determinan el consumo inicial, que se suma al consumo de impresión.</string>
+    <string name="help_machine_cost">Reserva por hora para desgaste, mantenimiento y amortización de la impresora. Se añade después del multiplicador de venta y no forma parte del coste multiplicado.</string>
+    <string name="help_sale_multiplier">Multiplica el coste de la pieza (material + electricidad) para obtener la parte principal del precio de venta. El coste de máquina se añade después.\n\nPrecio = Coste pieza × Multiplicador + Coste máquina</string>
 </resources>
 
