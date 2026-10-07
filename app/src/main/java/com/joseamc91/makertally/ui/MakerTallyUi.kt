@@ -54,6 +54,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseamc91.makertally.R
+import com.joseamc91.makertally.BuildConfig
 import com.joseamc91.makertally.data.StorageNotice
 import com.joseamc91.makertally.domain.*
 import java.math.BigDecimal
@@ -114,7 +115,7 @@ private val darkColors = darkColorScheme(primary=Color(0xFFA8C7FF),onPrimary=Col
                         },
                         actions={
                             if(!helpOpen && state.destination==Destination.Settings) Text(
-                                stringResource(R.string.alpha_version),
+                                "v" + BuildConfig.VERSION_NAME,
                                 modifier=Modifier.padding(horizontal=12.dp),
                                 style=MaterialTheme.typography.labelSmall,
                                 color=MakerTallyWhite.copy(alpha=.65f),
@@ -579,7 +580,7 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
             keyboardOptions=KeyboardOptions(imeAction=ImeAction.Next),keyboardActions=KeyboardActions(onNext={weightFocus.requestFocus()}),modifier=modifier.fillMaxWidth().focusRequester(variantFocus).testTag("filament_variant"))
     }
     val weightField:@Composable (Modifier)->Unit={modifier ->
-        NumberInput(draft.weight,{model.editor(draft.copy(weight=it))},R.string.spool_weight,R.string.unit_g,"filament_weight",NumericInput.nonNegative(draft.weight,positive=true)==null,modifier=modifier.focusRequester(weightFocus),nextFocus=priceFocus)
+        NumberInput(draft.weight,{model.editor(draft.copy(weight=it))},R.string.spool_weight,R.string.unit_g,"filament_weight",NumericInput.nonNegative(draft.weight,positive=true)==null,errorLabel=R.string.positive_number,modifier=modifier.focusRequester(weightFocus),nextFocus=priceFocus)
     }
     val priceField:@Composable (Modifier)->Unit={modifier ->
         NumberInput(draft.price,{model.editor(draft.copy(price=it))},R.string.purchase_price,R.string.unit_euro,"filament_price",draft.price.isNotEmpty()&&NumericInput.nonNegative(draft.price)==null,modifier=modifier.focusRequester(priceFocus),nextFocus=powerFocus)

@@ -15,6 +15,9 @@ class ResourcesTests {
         assertEquals(en.keys,es.keys);assertTrue(en.values.all{it.isNotBlank()});assertTrue(es.values.all{it.isNotBlank()})
         assertEquals("Machine (additional)",en["machine_additional"]);assertEquals("Máquina (adicional)",es["machine_additional"])
         assertFalse(en.keys.any{it.contains("roundup")})
+        assertFalse(en.containsKey("alpha_version"));assertFalse(es.containsKey("alpha_version"))
+        assertEquals("Enter a valid number greater than zero",en["positive_number"])
+        assertEquals("Introduce un número válido mayor que cero",es["positive_number"])
     }
     @Test fun nativeManifestHasNoInternetOrGoogleServicesAndDeclaresPerAppLocales() {
         val manifest=File("src/main/AndroidManifest.xml").readText()

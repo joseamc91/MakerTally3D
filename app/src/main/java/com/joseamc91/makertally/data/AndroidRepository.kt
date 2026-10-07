@@ -1,6 +1,8 @@
 package com.joseamc91.makertally.data
 
 import android.content.Context
+import android.system.ErrnoException
+import android.system.OsConstants
 import android.util.AtomicFile
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
@@ -8,12 +10,25 @@ import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.joseamc91.makertally.domain.*
 import java.io.File
+import java.io.FileNotFoundException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
 class AndroidPrivateFiles(private val directory: File) : PrivateFiles {
-    override fun read(name: String): String? = File(directory, name).let { if (it.exists()) it.readText() else null }
+    override fun read(name: String): String? {
+        val base = File(directory, name)
+        return try {
+            // openRead restores AtomicFile's last committed backup before reading.
+            AtomicFile(base).openRead().bufferedReader(Charsets.UTF_8).use { it.readText() }
+        } catch (error: FileNotFoundException) {
+            // FileNotFoundException also covers EACCES/EISDIR: only ENOENT means absence.
+            // A remaining backup means recovery failed, rather than a genuine first run.
+            if ((error.cause as? ErrnoException)?.errno == OsConstants.ENOENT &&
+                !base.exists() && !File(base.path + ".bak").exists()) null
+            else throw error
+        }
+    }
     override fun writeAtomically(name: String, content: String) {
         if (!directory.exists() && !directory.mkdirs()) throw java.io.IOException("Cannot create private files directory")
         val atomic = AtomicFile(File(directory, name))

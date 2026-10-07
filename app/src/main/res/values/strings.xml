@@ -34,6 +34,7 @@
     <string name="multiplier_used">Multiplier used</string>
     <string name="gross_margin">Gross margin</string>
     <string name="valid_number">Enter a valid non-negative number</string>
+    <string name="positive_number">Enter a valid number greater than zero</string>
     <string name="whole_hours">Enter whole hours</string>
     <string name="minutes_range">Use whole minutes from 0 to 59</string>
     <string name="invalid_result">Check the inputs to see the result</string>
@@ -82,7 +83,6 @@
     <string name="sale_multiplier">Sale multiplier</string>
     <string name="decrease">Decrease</string>
     <string name="increase">Increase</string>
-    <string name="alpha_version">v0.1-alpha4</string>
     <string name="invalid_data">Damaged data was preserved and safe defaults were loaded.</string>
     <string name="read_failed">Data could not be read. Safe defaults are shown.</string>
     <string name="save_failed">Could not save. Your previous data remains unchanged.</string>

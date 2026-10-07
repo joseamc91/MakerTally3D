@@ -12,6 +12,7 @@ android {
         targetSdk = 36
         versionCode = 4
         versionName = "0.1-alpha4"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
     }
     compileOptions {
@@ -19,7 +20,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     androidResources { localeFilters += listOf("en", "es") }
-    buildFeatures { compose = true }
+    buildFeatures { compose = true; buildConfig = true }
 
 }
 dependencies {
@@ -36,6 +37,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
+    androidTestImplementation("androidx.test:runner:1.7.0")
+    androidTestImplementation("junit:junit:4.13.2")
 }
 
 
