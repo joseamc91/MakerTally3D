@@ -102,5 +102,8 @@
     <string name="help_heating_time">Approximate time spent heating up before printing. This time and the heating power determine the warm-up energy, which is added to the printing energy.</string>
     <string name="help_machine_cost">An hourly allowance for printer wear, maintenance and depreciation. It is added after the sale multiplier and is not part of the cost being multiplied.</string>
     <string name="help_sale_multiplier">Multiplies the piece cost (material + electricity) to obtain the main part of the selling price. Machine cost is added afterwards.\n\nPrice = Piece cost × Multiplier + Machine cost</string>
+    <string name="privacy_policy">Privacy policy</string>
+    <string name="privacy_open_online">Open policy in browser</string>
+    <string name="privacy_no_browser">No browser is available. You can read the full policy here offline.</string>
 </resources>
 

@@ -74,7 +74,8 @@ private val darkColors = darkColorScheme(primary=Color(0xFFA8C7FF),onPrimary=Col
     val state by model.state.collectAsStateWithLifecycle()
     val landscape=LocalConfiguration.current.orientation==Configuration.ORIENTATION_LANDSCAPE
     var helpOpen by rememberSaveable { mutableStateOf(false) }
-    BackHandler(enabled=helpOpen) { helpOpen=false }
+    var privacyOpen by rememberSaveable { mutableStateOf(false) }
+    BackHandler(enabled=helpOpen || privacyOpen) { helpOpen=false;privacyOpen=false }
     val dark = when(state.settings.theme) { ThemeMode.System -> isSystemInDarkTheme();ThemeMode.Light -> false;ThemeMode.Dark -> true }
     val density=LocalDensity.current
     val direction=LocalLayoutDirection.current
@@ -88,14 +89,14 @@ private val darkColors = darkColorScheme(primary=Color(0xFFA8C7FF),onPrimary=Col
         Surface(Modifier.fillMaxSize().semantics { testTagsAsResourceId=true }) {
             if (!state.ready) Box(Modifier.fillMaxSize(),contentAlignment=Alignment.Center) { CircularProgressIndicator() }
             else {
-                if(landscape) LandscapeShell(state,model,helpOpen,onHelp={helpOpen=true},onBack={helpOpen=false},
-                    onNavigate={helpOpen=false;model.navigate(it)})
+                if(landscape) LandscapeShell(state,model,helpOpen,privacyOpen,onHelp={helpOpen=true},onPrivacy={privacyOpen=true},onBack={helpOpen=false;privacyOpen=false},
+                    onNavigate={helpOpen=false;privacyOpen=false;model.navigate(it)})
                 else Scaffold(
                 containerColor=MaterialTheme.colorScheme.background,
                 topBar={
                     TopAppBar(
                         title={
-                            if(helpOpen) Text(stringResource(R.string.calculator_help),maxLines=1,overflow=TextOverflow.Ellipsis,
+                            if(helpOpen || privacyOpen) Text(stringResource(if(privacyOpen)R.string.privacy_policy else R.string.calculator_help),maxLines=1,overflow=TextOverflow.Ellipsis,
                                 style=MaterialTheme.typography.titleLarge,fontWeight=FontWeight.SemiBold)
                             else if(state.destination==Destination.Calculator) Row(
                                 verticalAlignment=Alignment.CenterVertically,
@@ -109,12 +110,12 @@ private val darkColors = darkColorScheme(primary=Color(0xFFA8C7FF),onPrimary=Col
                                 style=MaterialTheme.typography.titleLarge,fontWeight=FontWeight.SemiBold)
                         },
                         navigationIcon={
-                            if(helpOpen) IconButton(onClick={helpOpen=false},modifier=Modifier.testTag("help_back")) {
+                            if(helpOpen || privacyOpen) IconButton(onClick={helpOpen=false;privacyOpen=false},modifier=Modifier.testTag(if(privacyOpen)"privacy_back" else "help_back")) {
                                 Icon(painterResource(R.drawable.ic_arrow_back),contentDescription=stringResource(R.string.navigate_back),tint=MakerTallyWhite)
                             }
                         },
                         actions={
-                            if(!helpOpen && state.destination==Destination.Settings) Text(
+                            if(!helpOpen && !privacyOpen && state.destination==Destination.Settings) Text(
                                 "v" + BuildConfig.VERSION_NAME,
                                 modifier=Modifier.padding(horizontal=12.dp),
                                 style=MaterialTheme.typography.labelSmall,
@@ -130,7 +131,7 @@ private val darkColors = darkColorScheme(primary=Color(0xFFA8C7FF),onPrimary=Col
                 bottomBar={ NavigationBar(containerColor=MakerTallyNavy) {
                     Destination.entries.forEach { destination ->
                         val title=stringResource(destination.title())
-                        NavigationBarItem(selected=state.destination==destination,onClick={helpOpen=false;model.navigate(destination)},
+                        NavigationBarItem(selected=state.destination==destination,onClick={helpOpen=false;privacyOpen=false;model.navigate(destination)},
                             icon={ NavigationIcon(destination) },label={Text(title,maxLines=1)},
                             colors=NavigationBarItemDefaults.colors(
                                 selectedIconColor=MakerTallyGreen,selectedTextColor=MakerTallyWhite,
@@ -142,7 +143,7 @@ private val darkColors = darkColorScheme(primary=Color(0xFFA8C7FF),onPrimary=Col
                 } }
             ) { insets ->
                 Box(Modifier.padding(insets).consumeWindowInsets(insets).fillMaxSize()) {
-                    PageContent(state,model,helpOpen,onHelp={helpOpen=true})
+                    PageContent(state,model,helpOpen,privacyOpen,onHelp={helpOpen=true},onPrivacy={privacyOpen=true})
                 }
             }
                 state.notice?.let { notice -> AlertDialog(onDismissRequest=model::dismissNotice,
@@ -157,14 +158,14 @@ private val darkColors = darkColorScheme(primary=Color(0xFFA8C7FF),onPrimary=Col
         }
     }
 }
-@Composable private fun PageContent(state:UiState,model:MakerTallyViewModel,helpOpen:Boolean,onHelp:()->Unit) {
-    if(helpOpen) CalculatorHelpPage() else when(state.destination) {
+@Composable private fun PageContent(state:UiState,model:MakerTallyViewModel,helpOpen:Boolean,privacyOpen:Boolean,onHelp:()->Unit,onPrivacy:()->Unit) {
+    if(privacyOpen) PrivacyPolicyPage() else if(helpOpen) CalculatorHelpPage() else when(state.destination) {
         Destination.Calculator -> CalculatorPage(state,model)
         Destination.Filaments -> FilamentsPage(state,model)
-        Destination.Settings -> SettingsPage(state,model,onHelp=onHelp)
+        Destination.Settings -> SettingsPage(state,model,onHelp=onHelp,onPrivacy=onPrivacy)
     }
 }
-@Composable private fun LandscapeShell(state:UiState,model:MakerTallyViewModel,helpOpen:Boolean,onHelp:()->Unit,onBack:()->Unit,onNavigate:(Destination)->Unit) {
+@Composable private fun LandscapeShell(state:UiState,model:MakerTallyViewModel,helpOpen:Boolean,privacyOpen:Boolean,onHelp:()->Unit,onPrivacy:()->Unit,onBack:()->Unit,onNavigate:(Destination)->Unit) {
     val density=LocalDensity.current
     val direction=LocalLayoutDirection.current
     val navigationLeft=WindowInsets.navigationBars.getLeft(density,direction)
@@ -177,13 +178,13 @@ private val darkColors = darkColorScheme(primary=Color(0xFFA8C7FF),onPrimary=Col
         Column(Modifier.weight(1f).fillMaxHeight()
             .windowInsetsPadding(WindowInsets.safeDrawing.only(if(railRight)WindowInsetsSides.Start else WindowInsetsSides.End))
             .testTag("landscape_content")) {
-            if(helpOpen) Row(Modifier.fillMaxWidth().heightIn(min=48.dp).padding(end=16.dp).testTag("landscape_help_header"),verticalAlignment=Alignment.CenterVertically) {
-                IconButton(onClick=onBack,modifier=Modifier.size(48.dp).testTag("help_back")) {
+            if(helpOpen || privacyOpen) Row(Modifier.fillMaxWidth().heightIn(min=48.dp).padding(end=16.dp).testTag(if(privacyOpen)"landscape_privacy_header" else "landscape_help_header"),verticalAlignment=Alignment.CenterVertically) {
+                IconButton(onClick=onBack,modifier=Modifier.size(48.dp).testTag(if(privacyOpen)"privacy_back" else "help_back")) {
                     Icon(painterResource(R.drawable.ic_arrow_back),contentDescription=stringResource(R.string.navigate_back),tint=MaterialTheme.colorScheme.onSurface)
                 }
-                Text(stringResource(R.string.calculator_help),style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.SemiBold)
+                Text(stringResource(if(privacyOpen)R.string.privacy_policy else R.string.calculator_help),style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.SemiBold)
             }
-            Box(Modifier.weight(1f).fillMaxWidth()) { PageContent(state,model,helpOpen,onHelp) }
+            Box(Modifier.weight(1f).fillMaxWidth()) { PageContent(state,model,helpOpen,privacyOpen,onHelp,onPrivacy) }
         }
         if(railRight) LandscapeRail(state,onNavigate,WindowInsetsSides.End)
     }
@@ -473,7 +474,7 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
         }
     }
 }
-@Composable private fun SettingsPage(state:UiState,model:MakerTallyViewModel,onHelp:()->Unit) {
+@Composable private fun SettingsPage(state:UiState,model:MakerTallyViewModel,onHelp:()->Unit,onPrivacy:()->Unit) {
     val settings=state.settings;val lang=settings.language
     val landscape=LocalConfiguration.current.orientation==Configuration.ORIENTATION_LANDSCAPE
     val taxFocus=remember { FocusRequester() }
@@ -527,6 +528,9 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
                 StepRow(R.string.machine_rate,Formatting.money(settings.machineRate,lang)+stringResource(R.string.unit_per_h),"machine_rate",settings.machineRate>BigDecimal.ZERO,{model.step(SettingStep.MachineRate,false)},{model.step(SettingStep.MachineRate,true)})
                 StepRow(R.string.sale_multiplier,"×"+Formatting.number(settings.saleMultiplier,lang,1),"multiplier",settings.saleMultiplier>BigDecimal.ONE,{model.step(SettingStep.Multiplier,false)},{model.step(SettingStep.Multiplier,true)})
             }
+        }
+        TextButton(onClick=onPrivacy,modifier=Modifier.heightIn(min=48.dp).testTag("privacy_policy")) {
+            Text(stringResource(R.string.privacy_policy))
         }
     }
 }

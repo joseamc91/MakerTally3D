@@ -102,5 +102,8 @@
     <string name="help_heating_time">Tiempo aproximado de calentamiento antes de imprimir. Este tiempo y la potencia de calentamiento determinan el consumo inicial, que se suma al consumo de impresión.</string>
     <string name="help_machine_cost">Reserva por hora para desgaste, mantenimiento y amortización de la impresora. Se añade después del multiplicador de venta y no forma parte del coste multiplicado.</string>
     <string name="help_sale_multiplier">Multiplica el coste de la pieza (material + electricidad) para obtener la parte principal del precio de venta. El coste de máquina se añade después.\n\nPrecio = Coste pieza × Multiplicador + Coste máquina</string>
+    <string name="privacy_policy">Política de privacidad</string>
+    <string name="privacy_open_online">Abrir política en el navegador</string>
+    <string name="privacy_no_browser">No hay un navegador disponible. Puedes leer aquí la política completa sin conexión.</string>
 </resources>
 

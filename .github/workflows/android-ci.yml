@@ -28,6 +28,12 @@ jobs:
         run: ./gradlew testDebugUnitTest --console=plain
       - name: Assemble debug APK
         run: ./gradlew assembleDebug --console=plain
+      - name: Read app version
+        id: app_version
+        run: |
+          version=$(sed -n 's/^[[:space:]]*versionName = "\([^"]*\)".*/\1/p' app/build.gradle.kts)
+          [[ "$version" =~ ^[0-9A-Za-z][0-9A-Za-z.+-]*$ ]]
+          echo "version=$version" >> "$GITHUB_OUTPUT"
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v7
@@ -38,7 +44,7 @@ jobs:
       - name: Upload debug APK
         uses: actions/upload-artifact@v7
         with:
-          name: MakerTally3D-v0.1-alpha4-android-debug-ci-${{ github.run_number }}
+          name: MakerTally3D-v${{ steps.app_version.outputs.version }}-android-debug-ci-${{ github.run_number }}
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
 
