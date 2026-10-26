@@ -45,9 +45,12 @@ import java.math.BigDecimal
             style=MaterialTheme.typography.titleLarge,fontWeight=FontWeight.SemiBold)
         Surface(Modifier.weight(1f).fillMaxWidth(),color=MaterialTheme.colorScheme.background) {
             BoxWithConstraints(Modifier.fillMaxSize()) {
-                val compact=maxHeight<300.dp
+                // These explanation-heavy steps need more scroll space at short heights.
+                // Keep the approved footer placement on the other steps.
+                val compact=maxHeight<300.dp || (maxHeight<480.dp &&
+                    setup.step in listOf(SetupStep.Printer,SetupStep.Costs))
                 Column(Modifier.fillMaxSize().padding(horizontal=16.dp)) {
-                    Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(scroll).padding(vertical=12.dp),
+                    Column(Modifier.weight(1f).fillMaxWidth().testTag("onboarding_content").verticalScroll(scroll).padding(vertical=12.dp),
                         verticalArrangement=Arrangement.spacedBy(16.dp)) {
                         OnboardingContent(setup,model)
                         if(compact) Reassurance()
@@ -108,7 +111,13 @@ import java.math.BigDecimal
                 "onboarding_heating_power",NumericInput.nonNegative(setup.heatingPower)!=null,m,next=second) },
                 { m -> SetupInput(setup.heatingMinutes,{model.onboardingField(SetupField.HeatingMinutes,it)},R.string.setup_heating_duration,R.string.unit_min,
                     "onboarding_heating_minutes",NumericInput.nonNegative(setup.heatingMinutes)!=null,m.focusRequester(second)) })
-            Text(stringResource(R.string.setup_heating_reference),style=MaterialTheme.typography.bodyMedium)
+            Column(verticalArrangement=Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(R.string.setup_heating_reference),style=MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.setup_heating_example),style=MaterialTheme.typography.bodyMedium,
+                    fontWeight=FontWeight.SemiBold,modifier=Modifier.testTag("onboarding_heating_example"))
+                Text(stringResource(R.string.setup_heating_caution),style=MaterialTheme.typography.bodySmall,
+                    color=MaterialTheme.colorScheme.onSurfaceVariant,modifier=Modifier.testTag("onboarding_heating_caution"))
+            }
         }
         SetupStep.Costs -> {
             // Each explanation stays associated with its input, including when the pair is wide.
@@ -117,14 +126,16 @@ import java.math.BigDecimal
                 Text(stringResource(R.string.setup_machine_intro))
                 SetupInput(setup.machineRate,{model.onboardingField(SetupField.MachineRate,it)},R.string.machine_rate,R.string.input_per_hour,
                     "onboarding_machine",NumericInput.nonNegative(setup.machineRate)!=null,next=second)
-                Text(stringResource(R.string.setup_machine_reference),style=MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.setup_machine_reference),style=MaterialTheme.typography.bodyMedium,
+                    modifier=Modifier.testTag("onboarding_machine_reference"))
             } }, { m -> Column(m,verticalArrangement=Arrangement.spacedBy(12.dp)) {
                 Text(stringResource(R.string.sale_multiplier),style=MaterialTheme.typography.titleMedium)
                 Text(stringResource(R.string.setup_multiplier_intro))
                 SetupInput(setup.multiplier,{model.onboardingField(SetupField.Multiplier,it)},R.string.sale_multiplier,null,
                     "onboarding_multiplier",NumericInput.nonNegative(setup.multiplier)?.let{it>=BigDecimal.ONE}==true,
                     Modifier.focusRequester(second),error=R.string.setup_multiplier_error)
-                Text(stringResource(R.string.setup_multiplier_reference),style=MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.setup_multiplier_reference),style=MaterialTheme.typography.bodyMedium,
+                    modifier=Modifier.testTag("onboarding_multiplier_reference"))
             } })
         }
         SetupStep.Complete -> {

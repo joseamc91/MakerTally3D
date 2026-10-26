@@ -122,7 +122,9 @@
     <string name="setup_printer_title">2 of 3 · Printer</string>
     <string name="setup_printer_intro">During initial warm-up, the printer may use more power for a short time.\n\nThese values are optional and help refine the electricity cost estimate.</string>
     <string name="setup_heating_power">Warm-up power</string>
-    <string name="setup_heating_reference">If you cannot measure these values, you can leave them at 0 or use this starting reference:\n\n1200 W for 1 minute\n\nThis is only an illustrative example. Actual consumption depends on each printer.</string>
+    <string name="setup_heating_reference">If you cannot measure these values, you can leave them at 0 or use this starting reference:</string>
+    <string name="setup_heating_example">1200 W for 1 minute</string>
+    <string name="setup_heating_caution">This is only an illustrative example. Actual consumption depends on each printer.</string>
     <string name="setup_costs_title">3 of 3 · Costs and pricing</string>
     <string name="setup_machine_intro">The cost associated with using the printer: wear, maintenance, replacement parts or depreciation.</string>
     <string name="setup_machine_reference">If you do not want to include this cost, you can use €0/h.\n\nIf you are unsure what to enter, €0.25/h can serve as a starting reference.</string>

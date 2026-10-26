@@ -312,6 +312,8 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
     val landscape=LocalConfiguration.current.orientation==Configuration.ORIENTATION_LANDSCAPE
     val scroll=rememberScrollState()
     val hoursFocus=remember { FocusRequester() };val minutesFocus=remember { FocusRequester() }
+    var weightInteracted by rememberSaveable { mutableStateOf(false) }
+    var hoursInteracted by rememberSaveable { mutableStateOf(false) }
     var viewportHeight by remember { mutableIntStateOf(0) }
     var detailsTop by remember { mutableIntStateOf(0) }
     var detailsHeight by remember { mutableIntStateOf(0) }
@@ -332,7 +334,9 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
         SoftCard(compact=landscape) {
             Text(stringResource(R.string.new_print),style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.SemiBold)
             val weightInput:@Composable (Modifier)->Unit={modifier ->
-                NumberInput(state.input.weight,{model.input(weight=it)},R.string.piece_weight,R.string.unit_g,"piece_weight",NumericInput.nonNegative(state.input.weight)==null,modifier=modifier,nextFocus=hoursFocus)
+                NumberInput(state.input.weight,{weightInteracted=true;model.input(weight=it)},R.string.piece_weight,R.string.unit_g,"piece_weight",
+                    NumericInput.nonNegative(state.input.weight)==null && (weightInteracted || state.input.weight.isNotEmpty()),
+                    modifier=modifier.onFocusChanged{if(it.isFocused)weightInteracted=true},nextFocus=hoursFocus)
             }
             if(landscape) Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(12.dp),verticalAlignment=Alignment.Bottom) {
                 Column(Modifier.weight(1.2f)) { FilamentPicker(state,model,compact=true) }
@@ -342,7 +346,9 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
                 weightInput(Modifier)
             }
             Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) {
-                NumberInput(state.input.hours,{model.input(hours=it)},R.string.hours,R.string.unit_h,"hours",NumericInput.nonNegative(state.input.hours,integer=true)==null,R.string.whole_hours,true,Modifier.weight(1f).focusRequester(hoursFocus),nextFocus=minutesFocus)
+                NumberInput(state.input.hours,{hoursInteracted=true;model.input(hours=it)},R.string.hours,R.string.unit_h,"hours",
+                    NumericInput.nonNegative(state.input.hours,integer=true)==null && (hoursInteracted || state.input.hours.isNotEmpty()),
+                    R.string.whole_hours,true,Modifier.weight(1f).focusRequester(hoursFocus).onFocusChanged{if(it.isFocused)hoursInteracted=true},nextFocus=minutesFocus)
                 NumberInput(state.input.minutes,{model.input(minutes=it)},R.string.minutes,R.string.unit_min,"minutes",NumericInput.nonNegative(state.input.minutes,integer=true,maximum=59)==null,R.string.minutes_range,true,Modifier.weight(1f).focusRequester(minutesFocus))
             }
             if(result==null) Text(stringResource(R.string.invalid_result),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)

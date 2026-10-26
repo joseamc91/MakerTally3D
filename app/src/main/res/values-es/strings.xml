@@ -122,7 +122,9 @@
     <string name="setup_printer_title">2 de 3 · Impresora</string>
     <string name="setup_printer_intro">Durante el calentamiento inicial, la impresora puede consumir más energía durante un periodo corto de tiempo.\n\nEstos valores son opcionales y permiten afinar aún más el cálculo del coste eléctrico.</string>
     <string name="setup_heating_power">Potencia durante el calentamiento</string>
-    <string name="setup_heating_reference">Si no puedes medir estos valores, puedes dejarlos en 0 o utilizar como referencia inicial:\n\n1200 W durante 1 minuto\n\nEste valor es solo un ejemplo orientativo. El consumo real depende de cada impresora.</string>
+    <string name="setup_heating_reference">Si no puedes medir estos valores, puedes dejarlos en 0 o utilizar como referencia inicial:</string>
+    <string name="setup_heating_example">1200 W durante 1 minuto</string>
+    <string name="setup_heating_caution">Este valor es solo un ejemplo orientativo. El consumo real depende de cada impresora.</string>
     <string name="setup_costs_title">3 de 3 · Costes y venta</string>
     <string name="setup_machine_intro">Representa el coste asociado al uso de la impresora: desgaste, mantenimiento, piezas de sustitución o amortización.</string>
     <string name="setup_machine_reference">Si no quieres contabilizar este coste, puedes utilizar 0 €/h.\n\nSi no sabes qué valor utilizar, 0,25 €/h puede servir como referencia inicial.</string>
