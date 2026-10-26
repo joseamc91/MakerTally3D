@@ -19,6 +19,12 @@ outputs/
 *.pfx
 *.p12
 *.key
+*.pem
+*.p8
+*.pkcs12
+keystore.properties
+signing.properties
+secrets/
 Thumbs.db
 .DS_Store
 

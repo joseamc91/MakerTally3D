@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+<rect width="1280" height="640" fill="#01245F"/>
+<rect x="100" y="88" width="120" height="5" fill="#10F283"/>
+<image href="../../../branding/icon/store/makertally_playstore_512.png" x="70" y="170" width="300" height="300"/>
+<text x="420" y="270" font-family="Segoe UI, Arial, sans-serif" font-size="76" font-weight="700" fill="#FDFCFD">MakerTally 3D</text>
+<text x="420" y="354" font-family="Segoe UI, Arial, sans-serif" font-size="36" font-weight="400" fill="#FDFCFD">3D printing cost calculator</text>
+<text x="420" y="422" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="400" fill="#10F283">Offline · Android · Open source</text>
+</svg>

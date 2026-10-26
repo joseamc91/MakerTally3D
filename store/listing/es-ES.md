@@ -1,5 +1,7 @@
 # Ficha de Google Play — es-ES
 
+Material archivado de la ficha 1.0. No describe los defaults iniciales de 1.1 ni tareas pendientes actuales de Play Console. Véanse el [README actual](../../README.md) y el [proceso de publicación](../../docs/RELEASE_PROCESS.es.md).
+
 ## Nombre de la app
 
 MakerTally 3D

@@ -1,0 +1,43 @@
+name: Bug report / Error
+description: Report a reproducible problem / Comunicar un error reproducible
+body:
+  - type: markdown
+    attributes:
+      value: "No publiques información sensible. Do not share credentials, signing files or personal data. Security vulnerabilities: see SECURITY.md."
+  - type: input
+    id: version
+    attributes:
+      label: Version / Versión
+      description: Version shown in Settings / Versión que aparece en Ajustes
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Android and device / Android y dispositivo
+      description: Include Android version and model, without serial numbers.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened? / ¿Qué ocurrió?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior / Comportamiento esperado
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps / Pasos para reproducir
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context / Información adicional
+      description: Optional sanitized screenshots or examples / Capturas o ejemplos sin datos sensibles

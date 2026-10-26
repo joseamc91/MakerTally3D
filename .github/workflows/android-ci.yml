@@ -2,9 +2,9 @@ name: Android CI
 on:
   workflow_dispatch:
   push:
-    branches: [main, android-native]
+    branches: [main, 'develop/**']
   pull_request:
-    branches: [main, android-native]
+    branches: [main]
 permissions:
   contents: read
 jobs:
@@ -26,14 +26,10 @@ jobs:
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-36' 'build-tools;36.0.0'
       - name: Unit tests
         run: ./gradlew testDebugUnitTest --console=plain
+      - name: Android lint
+        run: ./gradlew lintDebug --console=plain
       - name: Assemble debug APK
         run: ./gradlew assembleDebug --console=plain
-      - name: Read app version
-        id: app_version
-        run: |
-          version=$(sed -n 's/^[[:space:]]*versionName = "\([^"]*\)".*/\1/p' app/build.gradle.kts)
-          [[ "$version" =~ ^[0-9A-Za-z][0-9A-Za-z.+-]*$ ]]
-          echo "version=$version" >> "$GITHUB_OUTPUT"
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v7
@@ -41,10 +37,5 @@ jobs:
           name: android-unit-test-reports-${{ github.run_number }}
           path: app/build/test-results/testDebugUnitTest/*.xml
           if-no-files-found: warn
-      - name: Upload debug APK
-        uses: actions/upload-artifact@v7
-        with:
-          name: MakerTally3D-v${{ steps.app_version.outputs.version }}-android-debug-ci-${{ github.run_number }}
-          path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
+          retention-days: 14
 

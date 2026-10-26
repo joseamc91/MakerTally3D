@@ -1,6 +1,6 @@
 # First-run setup — development contract for 1.1.0
 
-Implementation lives on develop/v1.1.0. Build metadata deliberately remains 1.0.0 / code 5 until versioning is requested separately. Existing store materials and historical reports describe 1.0 and are not regenerated here.
+The 1.1 implementation is included in the current source on main, with versionName 1.1.0 / code 6. Store materials and historical reports for 1.0 are retained separately; they are not descriptions of the current first-run defaults. See [release process](RELEASE_PROCESS.md) for distribution policy.
 
 ## Storage and migration
 

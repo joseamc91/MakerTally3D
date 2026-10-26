@@ -41,6 +41,6 @@ class ResourcesTests {
         assertTrue(manifest.contains("@xml/locales_config"));assertTrue(manifest.contains("autoStoreLocales"))
         val build=File("build.gradle.kts").readText()
         assertTrue(build.contains("minSdk = 24"));assertTrue(build.contains("targetSdk = 36"))
-        assertTrue(build.contains("versionName = \"1.0.0\""));assertTrue(build.contains("versionCode = 5"))
+        assertTrue(build.contains("versionName = \"1.1.0\""));assertTrue(build.contains("versionCode = 6"))
     }
 }

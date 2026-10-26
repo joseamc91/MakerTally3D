@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360">
+<rect width="1280" height="360" fill="#01245F"/>
+<rect width="6" height="360" fill="#10F283"/>
+<image href="../../../branding/icon/store/makertally_playstore_512.png" x="40" y="52" width="256" height="256"/>
+<text x="350" y="150" font-family="Segoe UI, Arial, sans-serif" font-size="72" font-weight="700" fill="#FDFCFD">MakerTally 3D</text>
+<rect x="350" y="188" width="96" height="4" fill="#10F283"/>
+<text x="350" y="240" font-family="Segoe UI, Arial, sans-serif" font-size="32" font-weight="400" fill="#FDFCFD">Estimate your 3D printing costs</text>
+<text x="350" y="296" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400" fill="#10F283">Material · Electricity · Machine</text>
+</svg>

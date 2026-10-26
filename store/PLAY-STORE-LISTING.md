@@ -1,6 +1,6 @@
-# MakerTally 3D — Google Play listing materials
+# MakerTally 3D — Google Play listing materials (1.0 archive)
 
-Prepared on 7 October 2026 for manual review and entry. Nothing has been uploaded to Play Console. The app, legal documents and version are unchanged by this materials task.
+Prepared on 7 October 2026 for the 1.0 listing. These screenshots and copy are retained for that listing, not as current first-run documentation or a current list of pending Play Console tasks. See the [release process](../docs/RELEASE_PROCESS.md) and current [README](../README.en.md) for the maintained contract. No Play submission is performed by a repository documentation update.
 
 ## Identity and contact
 
@@ -126,7 +126,7 @@ Captured from the installed MakerTally 3D 1.0.0, code 5, on MakerTally_API36 (AO
 
 Android's standard SystemUI demo mode fixes the clock at 10:00, hides notifications and shows a full battery for clean screenshots. There are no Android Studio/debug overlays. The seven default editable profiles and the ASA 141 g / 6 h reference (9.35 EUR) are sample app data, not a user's personal library. The Add screenshot shows the natural first-open form before entering a new profile. Original emulator data was backed up and restored. Help is the only dark screenshot; the other six use Light theme.
 
-## Validation and remaining manual work
+## Historical validation and preparation checklist (7 October 2026)
 
 - App starts; installed metadata is 1.0.0 / 5. Settings screenshot visibly shows v1.0.0.
 - Descriptions match current README/privacy: EUR only, exact decimal costs, electricity taxes, machine allowance, multiplier, profiles, adaptive layouts, ES/EN and offline use. No stock/slicer/ERP claims.

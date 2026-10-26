@@ -1,5 +1,7 @@
 # Google Play listing — en-US
 
+Archived 1.0 listing copy, not a description of 1.1 first-run defaults or current pending Play Console work. See the [current README](../../README.en.md) and [release process](../../docs/RELEASE_PROCESS.md).
+
 ## App name
 
 MakerTally 3D

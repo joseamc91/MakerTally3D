@@ -1,106 +1,87 @@
-# MakerTally 3D
+<p align="center"><img src="docs/assets/Banner_README.png" alt="MakerTally 3D — Calcula el coste real de tus impresiones 3D" width="100%"></p>
+<p align="center"><strong>Español</strong> · <a href="README.en.md">English</a></p>
+<p align="center">
+  <a href="https://github.com/joseamc91/MakerTally3D/actions/workflows/android-ci.yml"><img src="https://github.com/joseamc91/MakerTally3D/actions/workflows/android-ci.yml/badge.svg" alt="Android CI"></a>
+  <img src="docs/assets/badges/android.svg" alt="Android 7.0 o posterior">
+  <img src="docs/assets/badges/kotlin.svg" alt="Kotlin">
+  <img src="docs/assets/badges/compose.svg" alt="Jetpack Compose y Material 3">
+  <a href="LICENSE"><img src="docs/assets/badges/license.svg" alt="Apache License 2.0"></a>
+</p>
+<p align="center">Estima el coste de tus impresiones 3D y un precio de venta orientativo con tus propios datos de material, electricidad y máquina.</p>
+<p align="center"><strong>Android · Offline · Sin cuentas · Sin anuncios · EUR (€)</strong></p>
+<p align="center">
+  <a href="docs/assets/Screenshot_Overview.png"><img src="docs/assets/Screenshot_Overview.png" alt="Capturas reales: calculadora, perfiles de filamento y editor compacto" width="100%"></a>
+  <br><sub>MakerTally 3D 1.1.0. Datos de ejemplo; interfaz disponible en español e inglés.</sub>
+</p>
 
-**v1.0.0 · Android native · Stable**
+## Qué es MakerTally 3D
 
-MakerTally 3D is a lightweight Android calculator for estimating the cost and suggested selling price of 3D prints. Built with Kotlin, Jetpack Compose and Material 3, it works offline with local persistence and exact decimal calculations.
+Una calculadora Android ligera para entender cuánto cuesta una pieza y orientar su precio de venta. Combina peso y precio del filamento, duración de la impresión, consumo eléctrico, calentamiento, impuestos efectivos, coste de máquina y un multiplicador configurable.
 
-This is the stable product version in the repository. **Google Play release is in preparation**; it is not yet available on Google Play. Production signing and final distribution are separate from this repository preparation.
+Los resultados dependen de los valores que introduzcas. La aplicación trabaja en **EUR (€)** y utiliza cálculos decimales exactos. No es un slicer, un ERP ni un gestor de pedidos o inventario: los perfiles de filamento **no representan stock restante**.
 
-## Features
+## Qué puedes hacer
 
-- **Calculator:** choose an active filament, enter piece weight, whole hours and minutes (0–59), and see the suggested selling price, piece cost, material, electricity and additional machine cost. Expand calculation details for energy, rates, multiplier and gross margin.
-- **Filament profiles:** add, edit, delete with confirmation, activate or deactivate; display purchase price and calculated €/kg. Sort by name or ascending/descending €/kg. Active profiles always precede inactive profiles, and the selected sort order is remembered. These are profiles, not stock inventory.
-- **Settings:** Spanish/English; System/Light/Dark themes; manual electricity price and effective electricity tax percentage; heating power, heating time, machine €/h and sale multiplier. Calculator Help explains the parameters. The full privacy policy is available offline, with an optional external link.
-- **Layouts:** portrait uses a top app bar and bottom navigation. Adaptive landscape uses a compact NavigationRail beside the system navigation area, recovering vertical space; Calculator, the filament grid, Add/Edit and Settings use two-column compositions where appropriate. Help and Privacy use compact internal headers.
-- **Input:** comma and dot decimal separators; validation of incomplete/invalid inputs before calculation or saving.
+| Área | Funciones |
+| --- | --- |
+| **Calculadora** | Elegir filamento, introducir peso y duración, consultar material, electricidad, coste de pieza, máquina y precio sugerido. Desplegar el detalle del cálculo y el margen bruto orientativo. |
+| **Filamentos** | Crear, editar y eliminar perfiles con material, marca, variante, peso de bobina, precio y potencia aproximada. Activar/desactivar y ordenar por nombre o €/kg; los activos aparecen primero. |
+| **Ajustes** | Configurar electricidad, impuestos efectivos, calentamiento, coste de máquina y multiplicador. Elegir Español/English y Sistema/Claro/Oscuro; consultar Ayuda y Privacidad sin conexión. |
+| **Pantallas adaptativas** | Usar la app en portrait y landscape, con navegación lateral y composiciones de dos columnas cuando hay espacio. |
 
-## Currency and defaults
+## Primer arranque en 1.1
 
-MakerTally 3D 1.0 works exclusively in **EUR (€)**. Language changes formatting, not the currency. There is no currency selector or exchange-rate conversion.
+La configuración guiada te permite introducir tus costes reales antes de calcular. Puedes cambiar estos valores después desde Ajustes.
 
-Seven editable filament profiles and initial electricity/printer values are supplied so the calculator works on first launch. Their brands, prices and power values are examples/estimates inherited from the reference data, not live prices or universal printer settings. Adjust them to your purchases, printer and electricity bill. `Spool` is an intentional free-text variant.
+Al terminar se añade un único perfil de ejemplo, **PLA · Generic**: bobina de **1000 g**, precio **14,99 €** y potencia de impresión **120 W**. Puedes editarlo, eliminarlo o añadir tus propios perfiles. Las referencias de consumo son orientativas y nunca rellenan campos automáticamente.
 
-Steppers change heating power by 100 W, heating time by 1 minute, machine rate by €0.05/hour and sale multiplier by 0.5. The multiplier has a UI minimum of 1; other steppers stop at zero. Electricity and tax percentage remain manually editable. If electricity price already includes taxes, leave Taxes at 0% to avoid counting them twice.
+La calculadora comienza con Peso y Horas vacíos, Minutos en 0 y sin resultado inicial. Las instalaciones existentes de 1.0 se reconocen automáticamente: conservan sus ajustes, perfiles y preferencias, incluida una biblioteca vacía, sin repetir la configuración ni añadir Generic.
 
-## Privacy
+<p align="center"><img src="docs/assets/screenshots/onboarding-es.png" alt="Bienvenida a la configuración inicial" width="260"></p>
 
-No account, backend, app-provided cloud synchronization, ads, analytics, telemetry, tracking, remote crash reporting or Google Play Services. The app does not request INTERNET permission. Filament profiles and settings stay in private local app storage; calculations run on the device.
+## Privacidad
 
-Read the canonical [Privacy Policy](PRIVACY.md), its [Spanish translation](PRIVACY.es.md) and [third-party notices](THIRD_PARTY_NOTICES.md). Opening the optional online policy delegates to an external browser; it does not give MakerTally network permission.
+MakerTally funciona **completamente offline**. No requiere cuenta y no tiene backend, nube propia, publicidad, analytics, tracking, telemetría ni informes remotos de fallos. No utiliza Google Play Services ni solicita el permiso **INTERNET**.
 
-## Storage
+Los perfiles, ajustes, preferencias y el progreso de configuración se guardan localmente en el almacenamiento privado de la app. Los cálculos se realizan en el dispositivo. La política completa está disponible dentro de la aplicación, también sin red.
 
-Settings use AndroidX Preferences DataStore (`files/datastore/settings.preferences_pb`). Filaments use `files/filaments.json` through Android AtomicFile for both writes and recovering reads. Decimal strings retain exact stored values. A missing library creates defaults; an intentionally empty library stays empty. Damaged data is preserved locally with `.invalid` before safe recovery, and storage problems produce localized notices.
+Consulta la [política en español](PRIVACY.es.md), el [documento canónico en inglés](PRIVACY.md) y los [avisos de terceros](THIRD_PARTY_NOTICES.md).
 
-Updating with a compatible signing certificate normally retains app data. Clearing storage or uninstalling normally removes private data through Android. `allowBackup=false` remains set, but system/OEM backup and device-transfer behavior can vary; there is no app-provided cloud backup. No Windows LocalAppData import is performed.
+## Distribución
 
-## Calculations
+**Google Play es el único canal oficial de distribución de MakerTally 3D.** GitHub ofrece código fuente y documentación; no proporciona APK, AAB ni instaladores para descarga manual. No hay un botón de descarga mientras la ficha pública no esté disponible para todos los usuarios.
 
-Monetary calculations use `BigDecimal`, without Float/Double conversion. Non-terminating divisions remain exact fractions until final rounding; DECIMAL128 is used only for presenting repeating technical values. Intermediate costs are not rounded.
+## Compatibilidad
 
-```text
-TimeHours = Hours + Minutes / 60
-PricePerGram = PurchasePrice / SpoolWeightGrams
-MaterialCost = PieceWeightGrams × PricePerGram
-HeatingEnergy = HeatingPower × HeatingMinutes / 60000
-PrintingEnergy = PrintPower × (Hours × 60 + Minutes) / 60000
-TotalEnergy = HeatingEnergy + PrintingEnergy
-EffectiveElectricityPrice = ElectricityPrice × (1 + ElectricityTaxPercent / 100)
-ElectricityCost = TotalEnergy × EffectiveElectricityPrice
-PieceCost = MaterialCost + ElectricityCost
-MachineCost = MachineRate × TimeHours
-RawSalePrice = PieceCost × SaleMultiplier + MachineCost
-SuggestedSalePrice = Excel ROUNDUP(RawSalePrice, 2)
-RawGrossMargin = SuggestedSalePrice − PieceCost − MachineCost
-GrossMargin = Excel ROUNDUP(RawGrossMargin, 2)
-```
+- Android 7.0 o posterior (API 24+); compile/target SDK 36.
+- Español e inglés; temas Sistema, Claro y Oscuro.
+- Portrait y landscape adaptativo, con scroll para pantallas pequeñas y fuentes ampliadas.
+- Moneda EUR; sin conversión ni selector de moneda.
 
-Piece cost excludes machine cost. Machine cost is added after applying the sale multiplier. Excel ROUNDUP uses `RoundingMode.UP` (away from zero), including negative values; display formatting does not change calculation precision.
+La validación de desarrollo utiliza un emulador AOSP Android 16 / API 36. Esto no implica pruebas exhaustivas en todos los dispositivos; cada publicación requiere además una comprobación en hardware real.
 
-ASA eSun reference, 141 g / 6 h / 0 min, default electricity price and Taxes 0%: material **2.4675**, electricity **0.14839**, piece **2.61589**, machine **1.50**, raw sale **9.34767**, suggested sale **9.35**, raw gross **5.23411**, gross margin **5.24**.
+<details>
+<summary>Ver el layout landscape en modo oscuro</summary>
+<p><img src="docs/assets/screenshots/landscape-es.png" alt="Calculadora landscape con navegación lateral y resultados en dos columnas" width="100%"></p>
+</details>
 
-## Build and test
+## Código y documentación
 
-Application ID and namespace: `com.joseamc91.makertally`. Version: `1.0.0`, versionCode `5`. Compile/target SDK **36**, minimum SDK **24**, Java source/target **17**.
+Construido con **Kotlin, Jetpack Compose y Material 3**. La suite actual contiene **90 tests JVM y 9 instrumentados**. Android CI valida el wrapper, tests JVM, lint y Debug; conserva únicamente informes de tests, nunca paquetes instalables. Los instrumentados se ejecutan localmente.
 
-Toolchain: AGP 9.4.0, Gradle 9.6.0, Kotlin 2.4.20, Compose BOM 2026.06.01 (UI/Foundation 1.11.4, Material 3 1.4.0). Use a compatible Android Studio/JDK; CI uses Temurin 21. Install SDK Platform 36 and Build Tools 36.0.0. Set your own ignored `local.properties` or `ANDROID_HOME`; machine-specific SDK/JDK paths and AAPT2 overrides are not committed.
+- [Historial de cambios](CHANGELOG.md)
+- [Arquitectura](docs/ARCHITECTURE.es.md)
+- [Cálculos y precisión](docs/CALCULATIONS.es.md)
+- [Desarrollo y pruebas](docs/DEVELOPMENT.es.md)
+- [Proceso de publicación](docs/RELEASE_PROCESS.es.md)
+- [Contribuciones](CONTRIBUTING.md) · [Seguridad](SECURITY.md)
 
-```sh
-./gradlew testDebugUnitTest
-./gradlew assembleDebug
-adb install -r app/build/outputs/apk/debug/app-debug.apk
-adb shell am start -n com.joseamc91.makertally/.MainActivity
+La etapa anterior .NET MAUI se conserva en el tag histórico `maui-alpha4-final`.
 
-# With a booted Android emulator/device:
-./gradlew connectedDebugAndroidTest
+## Autor y soporte
 
-# Production variants build, but remain unsigned until signing is configured:
-./gradlew assembleRelease bundleRelease
-./gradlew lintDebug
-```
+Proyecto de **joseamc91**. Para errores y propuestas, utiliza [GitHub Issues](https://github.com/joseamc91/MakerTally3D/issues). Contacto público: **joseamc91.dev@gmail.com**. Las vulnerabilidades sensibles se comunican por privado según [SECURITY.md](SECURITY.md).
 
-On Windows use `gradlew.bat`. Existing local Windows Application Control restrictions are handled only through supported local tooling, without weakening security policies. CI uses standard tools without local overrides.
+## Licencia
 
-## Validation and CI
-
-**71 JVM tests + 7 Android instrumented tests = 78 total local tests.** Coverage includes exact calculations and taxes, numeric input, persistence/recovery, preferences, ordering, ViewModel state and localized resources. Instrumented tests exercise real Android AtomicFile, including backup recovery and IO errors.
-
-Validation uses the **MakerTally_API36 AOSP Pixel 7 emulator**, including portrait/landscape, ES/EN and Light/Dark/System behavior. Broader physical-device/API coverage and an actual 16 KB runtime check remain to be completed; they are not presented as already tested.
-
-Android CI validates the Gradle Wrapper, runs the **71 JVM tests** and `assembleDebug`, then uploads test reports and a debug APK. It **does not run instrumented tests** or create a signed release, AAB, GitHub Release or Play publication. The APK artifact is named `MakerTally3D-v<versionName>-android-debug-ci-<run>` using the version from `app/build.gradle.kts`.
-
-## Scope and publication
-
-MakerTally is a lightweight calculator: no stock management, slicer/3MF import, accounts or cloud. EUR is the 1.0 currency. These are scope decisions, not bugs.
-
-See [Google Play release preparation](docs/PLAY-STORE-RELEASE.md) for the audited privacy/declaration contract and remaining signing/store tasks. No final `v1.0.0` tag or production release is created by this preparation.
-
-Historical reports in `docs/` describe their original alpha milestones and keep their original test counts. The previous .NET MAUI implementation is preserved at tag `maui-alpha4-final`.
-
-## Developer and support
-
-Public developer: **joseamc91**. Privacy and support: [GitHub Issues](https://github.com/joseamc91/MakerTally3D/issues). Public email: **joseamc91.dev@gmail.com**.
-
-## License
-
-Licensed under the [Apache License 2.0](LICENSE). See [third-party notices](THIRD_PARTY_NOTICES.md) for the included Protobuf notice.
+MakerTally 3D se distribuye bajo [Apache License 2.0](LICENSE). Consulta los [avisos de componentes de terceros](THIRD_PARTY_NOTICES.md).

@@ -1,0 +1,22 @@
+name: Feature request / Propuesta
+description: Discuss a focused improvement / Proponer una mejora acotada
+body:
+  - type: markdown
+    attributes:
+      value: "MakerTally focuses on 3D printing cost calculation. Mantén la propuesta dentro de ese alcance y no publiques información sensible."
+  - type: textarea
+    id: need
+    attributes:
+      label: Problem or need / Problema o necesidad
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed improvement / Mejora propuesta
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context and alternatives / Contexto y alternativas

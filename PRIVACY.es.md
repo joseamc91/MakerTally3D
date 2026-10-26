@@ -1,6 +1,6 @@
 # Política de privacidad de MakerTally 3D
 
-Fecha de entrada en vigor: 7 de octubre de 2026. El documento canónico público es PRIVACY.md, en inglés.
+Fecha de entrada en vigor: 26 de octubre de 2026. El documento canónico público es PRIVACY.md, en inglés.
 
 ## Desarrollador
 
@@ -21,6 +21,8 @@ MakerTally no transmite datos personales al desarrollador. La aplicación no rec
 ## Datos locales
 
 Los perfiles de filamentos, los ajustes de calculadora y las preferencias se guardan en el almacenamiento privado local de la aplicación. Incluyen idioma, tema, precio de electricidad, porcentaje efectivo de impuestos eléctricos, potencia y tiempo de calentamiento, coste de máquina, multiplicador de venta y ordenación de filamentos. Los datos de impresión y los cálculos se procesan en el dispositivo.
+
+La configuración guiada también guarda el paso actual, los valores introducidos (incluidas entradas incompletas), si la configuración está completada, el origen de la instalación, un identificador local del perfil de ejemplo y si se ha reconocido la explicación inicial de filamentos. Esto permite reanudar la configuración y evitar repetirla en instalaciones existentes. Estos registros permanecen locales y no se transmiten al desarrollador.
 
 MakerTally no añade cifrado propio a estos archivos. Android y la configuración del dispositivo controlan el acceso al almacenamiento privado. Si un archivo local se daña, puede conservarse una copia local antes de recuperarlo; no se sube a ningún servidor.
 

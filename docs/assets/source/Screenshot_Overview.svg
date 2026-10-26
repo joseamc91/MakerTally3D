@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+<rect width="1600" height="1000" fill="#01245F"/>
+<image href="../screenshots/calculator-es.png" x="96" y="80" width="432" height="864"/>
+<text x="184.4453125" y="54" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" fill="#FDFCFD">Calculadora · Calculator</text>
+<image href="../screenshots/filaments-es.png" x="584" y="80" width="432" height="864"/>
+<text x="679.6640625" y="54" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" fill="#FDFCFD">Filamentos · Filaments</text>
+<image href="../screenshots/editor-es.png" x="1072" y="80" width="432" height="864"/>
+<text x="1255.4609375" y="54" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" fill="#FDFCFD">Editor</text>
+</svg>

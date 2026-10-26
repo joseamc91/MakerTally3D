@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Private security report / Seguridad por privado
+    url: https://github.com/joseamc91/MakerTally3D/blob/main/SECURITY.md
+    about: Do not disclose sensitive vulnerabilities in public Issues.

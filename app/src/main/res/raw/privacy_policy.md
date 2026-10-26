@@ -1,6 +1,6 @@
 # MakerTally 3D Privacy Policy
 
-Effective date: 7 October 2026.
+Effective date: 26 October 2026.
 
 ## Developer
 
@@ -21,6 +21,8 @@ MakerTally does not transmit personal data to the developer. The app does not co
 ## Local data
 
 Filament profiles, calculator settings and preferences are stored in the app's private local storage. These include language, theme, electricity price, effective electricity tax percentage, heating power and time, machine cost, sale multiplier and filament sort order. Printing inputs and calculations are processed on the device.
+
+Guided setup also stores the current step, entered values (including incomplete input), whether setup is complete, installation origin, a local example-profile identifier and whether the initial filament explanation has been acknowledged. This lets setup resume and avoids repeating it for existing installations. These records remain local and are not transmitted to the developer.
 
 MakerTally does not add its own encryption to these files. Access to private app storage is controlled by Android and the device configuration. If a local file is damaged, a local copy may be retained before recovery; it is not uploaded.
 
