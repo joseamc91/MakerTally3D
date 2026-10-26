@@ -20,3 +20,5 @@ The overview uniformly scales whole screenshots; standalone PNGs preserve the ca
 The Spanish and English README share actual Spanish UI screenshots; the app also supports English. `store/` retains separate 1.0 listing materials. To apply Social Preview, upload the PNG in the repository's Settings → General → Social preview.
 
 Static technology/license badges in `badges/` are local SVG text assets. Only the live Android CI badge is fetched from GitHub; the README does not depend on an external badge-generation service.
+
+`badges/google-play-es.png` and `badges/google-play-en.png` are the official Spanish and English Google Play download badges (478 × 142), downloaded from [Google's Partner Marketing Hub](https://partnermarketinghub.withgoogle.com/brands/google-play/google-play/lockups-icons-badges/?folder=86642). The original PNG files are preserved without recoloring, cropping or distortion and displayed proportionally at half size. Google Play and the Google Play logo are trademarks of Google LLC.

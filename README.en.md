@@ -9,6 +9,7 @@
 </p>
 <p align="center">Estimate 3D printing costs and a suggested selling price using your own material, electricity and machine costs.</p>
 <p align="center"><strong>Android · Offline · No accounts · No ads · EUR (€)</strong></p>
+<p align="center"><a href="https://play.google.com/store/apps/details?id=com.joseamc91.makertally"><img src="docs/assets/badges/google-play-en.png" alt="Get it on Google Play" width="239"></a></p>
 <p align="center">
   <a href="docs/assets/Screenshot_Overview.png"><img src="docs/assets/Screenshot_Overview.png" alt="Actual app screens: calculator, filament profiles and compact editor" width="100%"></a>
   <br><sub>MakerTally 3D 1.1.0 with example data. Screens shown in Spanish; English is also available.</sub>
@@ -49,7 +50,7 @@ Read the [canonical English policy](PRIVACY.md), its [Spanish translation](PRIVA
 
 ## Distribution
 
-**Google Play is MakerTally 3D's only official binary distribution channel.** GitHub provides source code and documentation, with no APK, AAB or installers for manual download. There is no download button while the public listing is not available to everyone.
+**Google Play is MakerTally 3D's only official binary distribution channel.** Visit the [official Google Play listing](https://play.google.com/store/apps/details?id=com.joseamc91.makertally). GitHub provides source code and documentation, with no APK, AAB or installers for manual download.
 
 ## Compatibility
 

@@ -9,6 +9,7 @@
 </p>
 <p align="center">Estima el coste de tus impresiones 3D y un precio de venta orientativo con tus propios datos de material, electricidad y máquina.</p>
 <p align="center"><strong>Android · Offline · Sin cuentas · Sin anuncios · EUR (€)</strong></p>
+<p align="center"><a href="https://play.google.com/store/apps/details?id=com.joseamc91.makertally"><img src="docs/assets/badges/google-play-es.png" alt="Descargar en Google Play" width="239"></a></p>
 <p align="center">
   <a href="docs/assets/Screenshot_Overview.png"><img src="docs/assets/Screenshot_Overview.png" alt="Capturas reales: calculadora, perfiles de filamento y editor compacto" width="100%"></a>
   <br><sub>MakerTally 3D 1.1.0. Datos de ejemplo; interfaz disponible en español e inglés.</sub>
@@ -49,7 +50,7 @@ Consulta la [política en español](PRIVACY.es.md), el [documento canónico en i
 
 ## Distribución
 
-**Google Play es el único canal oficial de distribución de MakerTally 3D.** GitHub ofrece código fuente y documentación; no proporciona APK, AAB ni instaladores para descarga manual. No hay un botón de descarga mientras la ficha pública no esté disponible para todos los usuarios.
+**Google Play es el único canal oficial de distribución de MakerTally 3D.** Consulta la [ficha oficial en Google Play](https://play.google.com/store/apps/details?id=com.joseamc91.makertally). GitHub ofrece código fuente y documentación; no proporciona APK, AAB ni instaladores para descarga manual.
 
 ## Compatibilidad
 
