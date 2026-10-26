@@ -617,27 +617,32 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
             Column(Modifier.safeDrawingPadding().imePadding().fillMaxSize()) {
                 Row(Modifier.fillMaxWidth().padding(horizontal=12.dp,vertical=if(landscape)0.dp else 8.dp),verticalAlignment=Alignment.CenterVertically) {
                     Text(stringResource(if(draft.original==null)R.string.add_filament else R.string.edit_filament),Modifier.weight(1f),style=MaterialTheme.typography.titleLarge)
-                    TextButton(onClick=model::closeEditor,enabled=!state.saving){Text(stringResource(R.string.cancel))}
+                    TextButton(onClick=model::closeEditor,enabled=!state.saving,modifier=Modifier.testTag("cancel_filament")){Text(stringResource(R.string.cancel))}
                 }
                 BoxWithConstraints(Modifier.weight(1f).fillMaxWidth().padding(horizontal=16.dp)) {
-                    val wide=maxWidth>=600.dp
-                    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()),verticalArrangement=Arrangement.spacedBy(12.dp)) {
-                        if(wide) {
+                    val wide=landscape && maxWidth>=600.dp
+                    val paired=wide || maxWidth>=360.dp*LocalDensity.current.fontScale
+                    Column(Modifier.fillMaxSize().testTag("filament_editor_content").verticalScroll(rememberScrollState()),verticalArrangement=Arrangement.spacedBy(8.dp)) {
+                        if(paired) {
                             Row(horizontalArrangement=Arrangement.spacedBy(12.dp),verticalAlignment=Alignment.CenterVertically) { materialField(Modifier.weight(1f));activeField(Modifier.weight(1f)) }
                             Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) { brandField(Modifier.weight(1f));variantField(Modifier.weight(1f)) }
+                        } else {
+                            activeField(Modifier);materialField(Modifier);brandField(Modifier);variantField(Modifier)
+                        }
+                        if(wide) {
                             Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) { weightField(Modifier.weight(1f));priceField(Modifier.weight(1f)) }
                             Row(horizontalArrangement=Arrangement.spacedBy(12.dp),verticalAlignment=Alignment.CenterVertically) {
                                 powerField(Modifier.weight(1f))
                                 Text(stringResource(R.string.print_power_intro),Modifier.weight(1f),style=MaterialTheme.typography.bodyMedium)
                             }
                         } else {
-                            activeField(Modifier);materialField(Modifier);brandField(Modifier);variantField(Modifier)
                             weightField(Modifier);priceField(Modifier);powerField(Modifier)
                         }
-                        Column(Modifier.fillMaxWidth().testTag("print_power_explanation"),verticalArrangement=Arrangement.spacedBy(12.dp)) {
+                        Column(Modifier.fillMaxWidth().testTag("print_power_explanation"),verticalArrangement=Arrangement.spacedBy(6.dp)) {
                             if(!wide) Text(stringResource(R.string.print_power_intro),style=MaterialTheme.typography.bodyMedium)
-                            Text(stringResource(R.string.print_power_detail),style=MaterialTheme.typography.bodyMedium)
-                            Text(stringResource(R.string.print_power_references),style=MaterialTheme.typography.bodyMedium)
+                            Text(stringResource(R.string.print_power_references),style=MaterialTheme.typography.labelLarge)
+                            Text(stringResource(R.string.print_power_reference_values),style=MaterialTheme.typography.bodyMedium,
+                                modifier=Modifier.testTag("print_power_reference_values"))
                             Text(stringResource(R.string.print_power_caution),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         if(scrollSave) saveAction()

@@ -44,9 +44,9 @@ class OnboardingUiTests {
         // Accessibility actions are asynchronous; wait for Compose to apply the edit.
         waitFor(tag,text=value)
     }
-    private fun scrollToEnd(tag:String) {
+    private fun scrollToEnd(tag:String,forward:Boolean=true) {
         repeat(12) {
-            if(!waitFor(tag).performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD))return
+            if(!waitFor(tag).performAction(if(forward)AccessibilityNodeInfo.ACTION_SCROLL_FORWARD else AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD))return
             instrumentation.waitForIdleSync();SystemClock.sleep(150)
         }
         error("Scroll did not reach end: $tag")
@@ -67,6 +67,10 @@ class OnboardingUiTests {
                 launch();waitFor("onboarding_step_welcome");waitFor("onboarding_reassurance")
                 click("onboarding_next");waitFor("onboarding_step_electricity")
                 waitFor("onboarding_next",false)
+                scrollToEnd("onboarding_content")
+                assertFalse(waitFor("onboarding_tax_help").isClickable)
+                assertTrue(waitFor("onboarding_tax_formula").isVisibleToUser)
+                scrollToEnd("onboarding_content",forward=false)
                 text("onboarding_electricity",",");text("onboarding_tax","0")
                 waitFor("onboarding_next",false)
                 val activity=monitor.lastActivity ?: error("Activity not created")
@@ -99,12 +103,19 @@ class OnboardingUiTests {
         val monitor=instrumentation.addMonitor(MainActivity::class.java.name,null,false)
         fun launch() { instrumentation.startActivitySync(Intent(context,MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)) }
         fun finish() { monitor.lastActivity?.let { activity -> instrumentation.runOnMainSync { activity.finish() };instrumentation.waitForIdleSync() } }
-        fun rotate(orientation:Int) {
+        fun rotate(orientation:Int,contentTag:String?=null) {
             instrumentation.runOnMainSync { monitor.lastActivity!!.requestedOrientation=orientation }
             val expected=if(orientation==ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)Configuration.ORIENTATION_LANDSCAPE else Configuration.ORIENTATION_PORTRAIT
+            fun ready():Boolean {
+                val layout=if(contentTag==null)instrumentation.uiAutomation.rootInActiveWindow else node(contentTag)
+                val rect=Rect();layout?.getBoundsInScreen(rect)
+                return context.resources.configuration.orientation==expected && !rect.isEmpty &&
+                    (if(expected==Configuration.ORIENTATION_LANDSCAPE)rect.width()>rect.height() else rect.height()>rect.width())
+            }
             val deadline=SystemClock.uptimeMillis()+15000
-            while(context.resources.configuration.orientation!=expected && SystemClock.uptimeMillis()<deadline) SystemClock.sleep(100)
-            assertEquals(expected,context.resources.configuration.orientation)
+            // Configuration can change before the fullscreen editor has been laid out.
+            while(!ready() && SystemClock.uptimeMillis()<deadline) SystemClock.sleep(100)
+            assertTrue("Rotated layout not ready",ready())
             instrumentation.waitForIdleSync()
         }
         fun errorState(tag:String,invalid:Boolean) {
@@ -148,6 +159,17 @@ class OnboardingUiTests {
                 text("hours","1.5");errorState("hours",true)
                 text("hours","0");errorState("hours",false)
                 text("piece_weight","");errorState("piece_weight",true)
+                click("nav_filaments");click("add_filament")
+                rotate(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT,contentTag="filament_editor_content")
+                waitFor("filament_active");text("filament_material","PLA");text("filament_brand","Test")
+                assertEquals("1000",waitFor("filament_weight").text?.toString())
+                assertEquals("",waitFor("filament_power").text?.toString())
+                text("filament_price","14.99");text("filament_power","120")
+                rotate(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE,contentTag="filament_editor_content")
+                scrollToEnd("filament_editor_content")
+                assertEquals("120",waitFor("filament_power").text?.toString())
+                assertEquals("PLA: 120 W · PETG: 140 W · ASA/ABS: 180 W",waitFor("print_power_reference_values").text?.toString())
+                click("cancel_filament")
                 finish()
             }
         } finally {

@@ -118,18 +118,20 @@
     <string name="setup_electricity_title">1 of 3 · Electricity</string>
     <string name="setup_electricity_intro">Enter your electricity tariff details. MakerTally will use them to calculate the energy cost of each print.</string>
     <string name="setup_tax_help">How do I calculate this percentage?</string>
-    <string name="setup_tax_explanation" formatted="false">Effective taxes represent the actual increase that taxes and charges add to the base electricity price.\n\n((Final price ÷ Base price) − 1) × 100\n\nIf your tariff already gives the final price per kWh including all taxes, you can enter that price and leave taxes at 0 %.</string>
+    <string name="setup_tax_explanation">Effective taxes are the increase that taxes and charges add to the base price.</string>
+    <string name="setup_tax_formula">((Final price ÷ Base price) − 1) × 100</string>
+    <string name="setup_tax_included" formatted="false">If your final price per kWh already includes all taxes, use that price and leave this value at 0 %.</string>
     <string name="setup_printer_title">2 of 3 · Printer</string>
-    <string name="setup_printer_intro">During initial warm-up, the printer may use more power for a short time.\n\nThese values are optional and help refine the electricity cost estimate.</string>
+    <string name="setup_printer_intro">During initial warm-up, the printer may use more energy for a short time. These optional values help refine the electricity cost estimate.</string>
     <string name="setup_heating_power">Warm-up power</string>
-    <string name="setup_heating_reference">If you cannot measure these values, you can leave them at 0 or use this starting reference:</string>
+    <string name="setup_heating_reference">If you cannot measure it, use 0 or this starting reference:</string>
     <string name="setup_heating_example">1200 W for 1 minute</string>
-    <string name="setup_heating_caution">This is only an illustrative example. Actual consumption depends on each printer.</string>
+    <string name="setup_heating_caution">An approximate reference only: actual consumption depends on each printer.</string>
     <string name="setup_costs_title">3 of 3 · Costs and pricing</string>
     <string name="setup_machine_intro">The cost associated with using the printer: wear, maintenance, replacement parts or depreciation.</string>
-    <string name="setup_machine_reference">If you do not want to include this cost, you can use €0/h.\n\nIf you are unsure what to enter, €0.25/h can serve as a starting reference.</string>
+    <string name="setup_machine_reference">Use €0/h if you do not want to include this cost. If you are unsure what to enter, €0.25/h can serve as a starting reference.</string>
     <string name="setup_multiplier_intro">Applied to the piece cost to obtain a suggested selling price. Machine cost is added afterwards.</string>
-    <string name="setup_multiplier_reference">The multiplier depends on your own costs and how you want to set your selling price.</string>
+    <string name="setup_multiplier_reference">Choose a multiplier based on your costs and pricing approach. Minimum ×1.</string>
     <string name="setup_multiplier_error">Enter a valid multiplier of at least ×1</string>
     <string name="setup_complete_title">Basic setup complete</string>
     <string name="setup_complete_intro">MakerTally now knows your general costs.\n\nNext, set up the filaments you use.</string>
@@ -139,9 +141,9 @@
     <string name="filament_intro_profile">PLA · Generic\nSpool: 1000 g\nPrice: €14.99\nPrinting power: 120 W</string>
     <string name="filament_intro_actions">You can edit this profile, delete it or use + to add the filaments you normally use.</string>
     <string name="understood">Got it</string>
-    <string name="print_power_intro">The approximate electrical power used by the printer while printing with this material.</string>
-    <string name="print_power_detail">Power use can vary by filament because some materials need higher hotend or heated-bed temperatures. For example, ASA and ABS usually print at higher temperatures than PLA and may increase electricity consumption.</string>
-    <string name="print_power_references">If you cannot measure your printer’s consumption, you can use these starting references:\n\nPLA: 120 W\nPETG: 140 W\nASA, ABS and high-temperature materials: 180 W</string>
-    <string name="print_power_caution">These are approximate reference values. Actual measurements from your printer will give more accurate estimates.</string>
+    <string name="print_power_intro">Printing power is the approximate electrical consumption of the printer while using this material. Higher-temperature materials may consume more power.</string>
+    <string name="print_power_references">Reference values if you cannot measure it:</string>
+    <string name="print_power_reference_values">PLA: 120 W · PETG: 140 W · ASA/ABS: 180 W</string>
+    <string name="print_power_caution">Actual measurements will provide more accurate estimates.</string>
 </resources>
 
