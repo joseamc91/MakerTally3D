@@ -82,14 +82,16 @@ private val darkColors = darkColorScheme(primary=Color(0xFFA8C7FF),onPrimary=Col
     val sideNavigation=WindowInsets.navigationBars.getLeft(density,direction)>0 || WindowInsets.navigationBars.getRight(density,direction)>0
     val view=LocalView.current
     SideEffect { (view.context as? Activity)?.window?.let { WindowCompat.getInsetsController(it,view).apply {
-        isAppearanceLightStatusBars=landscape && !dark;isAppearanceLightNavigationBars=landscape && !dark && !sideNavigation
+        isAppearanceLightStatusBars=state.onboarding.completed && landscape && !dark
+        isAppearanceLightNavigationBars=state.onboarding.completed && landscape && !dark && !sideNavigation
     } } }
     LaunchedEffect(state.ready,state.settings.language) { if(state.ready)applyLocale(state.settings.language) }
     MaterialTheme(colorScheme=if(dark)darkColors else lightColors) {
         Surface(Modifier.fillMaxSize().semantics { testTagsAsResourceId=true }) {
             if (!state.ready) Box(Modifier.fillMaxSize(),contentAlignment=Alignment.Center) { CircularProgressIndicator() }
             else {
-                if(landscape) LandscapeShell(state,model,helpOpen,privacyOpen,onHelp={helpOpen=true},onPrivacy={privacyOpen=true},onBack={helpOpen=false;privacyOpen=false},
+                if(!state.onboarding.completed) OnboardingPage(state,model)
+                else if(landscape) LandscapeShell(state,model,helpOpen,privacyOpen,onHelp={helpOpen=true},onPrivacy={privacyOpen=true},onBack={helpOpen=false;privacyOpen=false},
                     onNavigate={helpOpen=false;privacyOpen=false;model.navigate(it)})
                 else Scaffold(
                 containerColor=MaterialTheme.colorScheme.background,
@@ -154,6 +156,8 @@ private val darkColors = darkColorScheme(primary=Color(0xFFA8C7FF),onPrimary=Col
                     title={Text(stringResource(R.string.delete_title))},text={Text(filament.displayName+"\n\n"+stringResource(R.string.delete_message))},
                     dismissButton={TextButton(onClick=model::cancelDelete){Text(stringResource(R.string.cancel))}},
                     confirmButton={TextButton(onClick=model::confirmDelete,enabled=!state.saving){Text(stringResource(R.string.delete))}}) }
+                if(state.onboarding.completed && state.onboarding.newInstallation && !state.onboarding.filamentIntroSeen &&
+                    state.destination==Destination.Filaments && state.notice==null) FilamentIntroDialog(state,model)
             }
         }
     }
@@ -590,15 +594,12 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
         NumberInput(draft.price,{model.editor(draft.copy(price=it))},R.string.purchase_price,R.string.unit_euro,"filament_price",draft.price.isNotEmpty()&&NumericInput.nonNegative(draft.price)==null,modifier=modifier.focusRequester(priceFocus),nextFocus=powerFocus)
     }
     val powerField:@Composable (Modifier)->Unit={modifier ->
-        NumberInput(draft.power,{model.editor(draft.copy(power=it))},R.string.printing_power,R.string.unit_w,"filament_power",NumericInput.nonNegative(draft.power)==null,modifier=modifier.focusRequester(powerFocus))
+        NumberInput(draft.power,{model.editor(draft.copy(power=it))},R.string.printing_power,R.string.unit_w,"filament_power",draft.power.isNotEmpty()&&NumericInput.nonNegative(draft.power)==null,modifier=modifier.focusRequester(powerFocus))
     }
     val activeField:@Composable (Modifier)->Unit={modifier ->
         Row(modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
-            Text(stringResource(R.string.active),Modifier.weight(1f));Switch(draft.active,{model.editor(draft.copy(active=it))})
+            Text(stringResource(R.string.active),Modifier.weight(1f));Switch(draft.active,{model.editor(draft.copy(active=it))},modifier=Modifier.testTag("filament_active"))
         }
-    }
-    val derivedPrice:@Composable (Modifier)->Unit={modifier ->
-        Column(modifier) { CostRow(R.string.price_per_kg,Formatting.money(draft.build()?.pricePerKg,state.settings.language)+stringResource(R.string.unit_per_kg)) }
     }
     // Keep a full field visible when the landscape text keyboard leaves very little height.
     val scrollSave=landscape && WindowInsets.ime.getBottom(LocalDensity.current)>0
@@ -612,19 +613,30 @@ private fun Destination.title() = when(this){Destination.Calculator->R.string.ca
                     Text(stringResource(if(draft.original==null)R.string.add_filament else R.string.edit_filament),Modifier.weight(1f),style=MaterialTheme.typography.titleLarge)
                     TextButton(onClick=model::closeEditor,enabled=!state.saving){Text(stringResource(R.string.cancel))}
                 }
-                Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal=16.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
-                    if(landscape) {
-                        Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) { materialField(Modifier.weight(1f));brandField(Modifier.weight(1f)) }
-                        Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) { variantField(Modifier.weight(1f));weightField(Modifier.weight(1f)) }
-                        Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) { priceField(Modifier.weight(1f));powerField(Modifier.weight(1f)) }
-                        Row(horizontalArrangement=Arrangement.spacedBy(12.dp),verticalAlignment=Alignment.CenterVertically) { activeField(Modifier.weight(1f));derivedPrice(Modifier.weight(1f)) }
-                    } else {
-                        materialField(Modifier);brandField(Modifier);variantField(Modifier)
-                        weightField(Modifier);priceField(Modifier);powerField(Modifier)
-                        activeField(Modifier);derivedPrice(Modifier)
+                BoxWithConstraints(Modifier.weight(1f).fillMaxWidth().padding(horizontal=16.dp)) {
+                    val wide=maxWidth>=600.dp
+                    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()),verticalArrangement=Arrangement.spacedBy(12.dp)) {
+                        if(wide) {
+                            Row(horizontalArrangement=Arrangement.spacedBy(12.dp),verticalAlignment=Alignment.CenterVertically) { materialField(Modifier.weight(1f));activeField(Modifier.weight(1f)) }
+                            Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) { brandField(Modifier.weight(1f));variantField(Modifier.weight(1f)) }
+                            Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) { weightField(Modifier.weight(1f));priceField(Modifier.weight(1f)) }
+                            Row(horizontalArrangement=Arrangement.spacedBy(12.dp),verticalAlignment=Alignment.CenterVertically) {
+                                powerField(Modifier.weight(1f))
+                                Text(stringResource(R.string.print_power_intro),Modifier.weight(1f),style=MaterialTheme.typography.bodyMedium)
+                            }
+                        } else {
+                            activeField(Modifier);materialField(Modifier);brandField(Modifier);variantField(Modifier)
+                            weightField(Modifier);priceField(Modifier);powerField(Modifier)
+                        }
+                        Column(Modifier.fillMaxWidth().testTag("print_power_explanation"),verticalArrangement=Arrangement.spacedBy(12.dp)) {
+                            if(!wide) Text(stringResource(R.string.print_power_intro),style=MaterialTheme.typography.bodyMedium)
+                            Text(stringResource(R.string.print_power_detail),style=MaterialTheme.typography.bodyMedium)
+                            Text(stringResource(R.string.print_power_references),style=MaterialTheme.typography.bodyMedium)
+                            Text(stringResource(R.string.print_power_caution),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        if(scrollSave) saveAction()
+                        Spacer(Modifier.height(12.dp))
                     }
-                    if(scrollSave) saveAction()
-                    Spacer(Modifier.height(12.dp))
                 }
                 if(!scrollSave) saveAction()
             }

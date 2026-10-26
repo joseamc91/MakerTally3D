@@ -59,7 +59,7 @@ data class EditorDraft(
     val variant: String = original?.variant ?: "",
     val weight: String = original?.spoolWeight?.toPlainString() ?: "1000",
     val price: String = original?.purchasePrice?.toPlainString() ?: "",
-    val power: String = original?.printPower?.toPlainString() ?: "120",
+    val power: String = original?.printPower?.toPlainString() ?: "",
     val active: Boolean = original?.active ?: true
 ) {
     fun build(): Filament? = runCatching {

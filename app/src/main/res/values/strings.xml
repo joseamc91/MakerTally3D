@@ -67,7 +67,6 @@
     <string name="purchase_price">Purchase price</string>
     <string name="printing_power">Printing power</string>
     <string name="active">Active</string>
-    <string name="price_per_kg">Price per kg</string>
     <string name="required_fields">Complete the required fields with valid values.</string>
     <string name="calculation">Calculator settings</string>
     <string name="language">Language</string>
@@ -105,5 +104,42 @@
     <string name="privacy_policy">Privacy policy</string>
     <string name="privacy_open_online">Open policy in browser</string>
     <string name="privacy_no_browser">No browser is available. You can read the full policy here offline.</string>
+    <string name="setup_reassurance">Don’t worry if you’re not sure.\nYou can change these values later in Settings.</string>
+    <string name="setup_welcome">Set up your actual costs for estimates tailored to your printer and filaments.</string>
+    <string name="setup_material_energy_machine">Material · Electricity · Machine</string>
+    <string name="setup_start">Start setup</string>
+    <string name="setup_next">Next</string>
+    <string name="setup_back">Back</string>
+    <string name="input_per_hour">€/h</string>
+    <string name="setup_open_filaments">Set up filaments</string>
+    <string name="setup_electricity_price">Electricity price</string>
+    <string name="setup_effective_taxes">Effective taxes</string>
+    <string name="setup_heating_duration">Warm-up duration</string>
+    <string name="setup_electricity_title">1 of 3 · Electricity</string>
+    <string name="setup_electricity_intro">Enter your electricity tariff details. MakerTally will use them to calculate the energy cost of each print.</string>
+    <string name="setup_tax_help">How do I calculate this percentage?</string>
+    <string name="setup_tax_explanation" formatted="false">Effective taxes represent the actual increase that taxes and charges add to the base electricity price.\n\n((Final price ÷ Base price) − 1) × 100\n\nIf your tariff already gives the final price per kWh including all taxes, you can enter that price and leave taxes at 0 %.</string>
+    <string name="setup_printer_title">2 of 3 · Printer</string>
+    <string name="setup_printer_intro">During initial warm-up, the printer may use more power for a short time.\n\nThese values are optional and help refine the electricity cost estimate.</string>
+    <string name="setup_heating_power">Warm-up power</string>
+    <string name="setup_heating_reference">If you cannot measure these values, you can leave them at 0 or use this starting reference:\n\n1200 W for 1 minute\n\nThis is only an illustrative example. Actual consumption depends on each printer.</string>
+    <string name="setup_costs_title">3 of 3 · Costs and pricing</string>
+    <string name="setup_machine_intro">The cost associated with using the printer: wear, maintenance, replacement parts or depreciation.</string>
+    <string name="setup_machine_reference">If you do not want to include this cost, you can use €0/h.\n\nIf you are unsure what to enter, €0.25/h can serve as a starting reference.</string>
+    <string name="setup_multiplier_intro">Applied to the piece cost to obtain a suggested selling price. Machine cost is added afterwards.</string>
+    <string name="setup_multiplier_reference">The multiplier depends on your own costs and how you want to set your selling price.</string>
+    <string name="setup_multiplier_error">Enter a valid multiplier of at least ×1</string>
+    <string name="setup_complete_title">Basic setup complete</string>
+    <string name="setup_complete_intro">MakerTally now knows your general costs.\n\nNext, set up the filaments you use.</string>
+    <string name="setup_generic_explanation">You will find a generic PLA example with a 1000 g spool priced at €14.99. You can edit it, delete it or create your own profiles.</string>
+    <string name="setup_filaments">Set up your filaments</string>
+    <string name="filament_intro_message">We have added an example profile to help you get started.</string>
+    <string name="filament_intro_profile">PLA · Generic\nSpool: 1000 g\nPrice: €14.99\nPrinting power: 120 W</string>
+    <string name="filament_intro_actions">You can edit this profile, delete it or use + to add the filaments you normally use.</string>
+    <string name="understood">Got it</string>
+    <string name="print_power_intro">The approximate electrical power used by the printer while printing with this material.</string>
+    <string name="print_power_detail">Power use can vary by filament because some materials need higher hotend or heated-bed temperatures. For example, ASA and ABS usually print at higher temperatures than PLA and may increase electricity consumption.</string>
+    <string name="print_power_references">If you cannot measure your printer’s consumption, you can use these starting references:\n\nPLA: 120 W\nPETG: 140 W\nASA, ABS and high-temperature materials: 180 W</string>
+    <string name="print_power_caution">These are approximate reference values. Actual measurements from your printer will give more accurate estimates.</string>
 </resources>
 

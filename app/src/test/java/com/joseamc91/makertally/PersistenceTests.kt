@@ -52,7 +52,7 @@ class PersistenceTests {
     }
     @Test fun dataStoreReopeningPersistsSortLanguageAndThemeTogether() = runTest {
         val dir=kotlin.io.path.createTempDirectory("makertally-reopen").toFile()
-        val files=MemoryFiles()
+        val files=MemoryFiles().apply { data["filaments.json"]=DataCodec.encodeFilaments(Defaults.filaments()) }
         var expected=AppSettings()
         try {
             // Each pass uses a fresh DataStore instance over the same file, as after app restart.
@@ -117,7 +117,7 @@ class PersistenceTests {
             val updated=initial.settings.copy(language="en-US",theme=ThemeMode.Light,machineRate=decimal("0.30"))
             repo.saveSettings(updated);repo.saveFilaments(listOf(initial.filaments[4].copy(active=false)))
             assertEquals(updated,repo.load().settings);assertFalse(repo.load().filaments.single().active)
-            files.data.remove("filaments.json");assertEquals(updated,repo.load().settings);assertEquals(7,repo.load().filaments.size)
+            files.data.remove("filaments.json");assertEquals(updated,repo.load().settings);assertTrue(repo.load().filaments.isEmpty())
         }
     }
     @Test fun missingSettingsPreservesExistingLibrary() = runTest {
@@ -139,7 +139,10 @@ class PersistenceTests {
         val scope=CoroutineScope(SupervisorJob()+Dispatchers.IO)
         try {
             val store=PreferenceDataStoreFactory.create(scope=scope,produceFile={File(dir,"settings.preferences_pb")})
-            val files=MemoryFiles();block(PreferencesRepository(store,files),store,files)
+            // These tests exercise existing 1.0 data; fresh-install behavior has its own suite.
+            val files=MemoryFiles().apply { data["filaments.json"]=DataCodec.encodeFilaments(Defaults.filaments()) }
+            store.edit { it[stringPreferencesKey("settings_json")]=DataCodec.encodeSettings(AppSettings()) }
+            block(PreferencesRepository(store,files),store,files)
         } finally { scope.cancel(); scope.coroutineContext[Job]?.join();dir.deleteRecursively() }
     }
 }

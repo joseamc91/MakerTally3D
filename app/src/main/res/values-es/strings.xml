@@ -67,7 +67,6 @@
     <string name="purchase_price">Precio de compra</string>
     <string name="printing_power">Potencia de impresión</string>
     <string name="active">Activo</string>
-    <string name="price_per_kg">Precio por kg</string>
     <string name="required_fields">Completa los campos obligatorios con valores válidos.</string>
     <string name="calculation">Ajustes de calculadora</string>
     <string name="language">Idioma</string>
@@ -105,5 +104,42 @@
     <string name="privacy_policy">Política de privacidad</string>
     <string name="privacy_open_online">Abrir política en el navegador</string>
     <string name="privacy_no_browser">No hay un navegador disponible. Puedes leer aquí la política completa sin conexión.</string>
+    <string name="setup_reassurance">No te preocupes si no estás seguro.\nPodrás cambiar estos valores más adelante desde Ajustes.</string>
+    <string name="setup_welcome">Configura tus costes reales para obtener estimaciones adaptadas a tu impresora y a tus filamentos.</string>
+    <string name="setup_material_energy_machine">Material · Electricidad · Máquina</string>
+    <string name="setup_start">Empezar configuración</string>
+    <string name="setup_next">Siguiente</string>
+    <string name="setup_back">Atrás</string>
+    <string name="input_per_hour">€/h</string>
+    <string name="setup_open_filaments">Configurar filamentos</string>
+    <string name="setup_electricity_price">Precio de electricidad</string>
+    <string name="setup_effective_taxes">Impuestos efectivos</string>
+    <string name="setup_heating_duration">Duración del calentamiento</string>
+    <string name="setup_electricity_title">1 de 3 · Electricidad</string>
+    <string name="setup_electricity_intro">Introduce los datos de tu tarifa eléctrica. MakerTally los utilizará para calcular el coste energético de cada impresión.</string>
+    <string name="setup_tax_help">¿Cómo calculo este porcentaje?</string>
+    <string name="setup_tax_explanation" formatted="false">Los impuestos efectivos representan el incremento real que los impuestos y cargos aplican sobre el precio base de la electricidad.\n\n((Precio final ÷ Precio base) − 1) × 100\n\nSi la tarifa ya muestra directamente el precio final por kWh con todos los impuestos incluidos, puedes introducir ese precio y dejar impuestos en 0 %.</string>
+    <string name="setup_printer_title">2 de 3 · Impresora</string>
+    <string name="setup_printer_intro">Durante el calentamiento inicial, la impresora puede consumir más energía durante un periodo corto de tiempo.\n\nEstos valores son opcionales y permiten afinar aún más el cálculo del coste eléctrico.</string>
+    <string name="setup_heating_power">Potencia durante el calentamiento</string>
+    <string name="setup_heating_reference">Si no puedes medir estos valores, puedes dejarlos en 0 o utilizar como referencia inicial:\n\n1200 W durante 1 minuto\n\nEste valor es solo un ejemplo orientativo. El consumo real depende de cada impresora.</string>
+    <string name="setup_costs_title">3 de 3 · Costes y venta</string>
+    <string name="setup_machine_intro">Representa el coste asociado al uso de la impresora: desgaste, mantenimiento, piezas de sustitución o amortización.</string>
+    <string name="setup_machine_reference">Si no quieres contabilizar este coste, puedes utilizar 0 €/h.\n\nSi no sabes qué valor utilizar, 0,25 €/h puede servir como referencia inicial.</string>
+    <string name="setup_multiplier_intro">Se aplica al coste de la pieza para obtener un precio de venta sugerido. El coste de máquina se añade posteriormente.</string>
+    <string name="setup_multiplier_reference">El multiplicador depende de tus propios costes y del criterio con el que quieras establecer el precio de venta.</string>
+    <string name="setup_multiplier_error">Introduce un multiplicador válido de al menos ×1</string>
+    <string name="setup_complete_title">Configuración básica completada</string>
+    <string name="setup_complete_intro">MakerTally ya conoce tus costes generales.\n\nAhora solo falta configurar los filamentos que utilizas.</string>
+    <string name="setup_generic_explanation">Encontrarás un PLA genérico de ejemplo con una bobina de 1000 g y un precio de 14,99 €. Puedes editarlo, eliminarlo o crear tus propios perfiles.</string>
+    <string name="setup_filaments">Configura tus filamentos</string>
+    <string name="filament_intro_message">Hemos añadido un perfil de ejemplo para ayudarte a empezar.</string>
+    <string name="filament_intro_profile">PLA · Generic\nBobina: 1000 g\nPrecio: 14,99 €\nPotencia de impresión: 120 W</string>
+    <string name="filament_intro_actions">Puedes editar este perfil, eliminarlo o utilizar + para añadir los filamentos que usas normalmente.</string>
+    <string name="understood">Entendido</string>
+    <string name="print_power_intro">Consumo eléctrico aproximado de la impresora mientras imprime con este material.</string>
+    <string name="print_power_detail">Puede variar entre filamentos porque algunos materiales necesitan temperaturas más altas del hotend o de la cama caliente. Por ejemplo, ASA y ABS suelen trabajar a temperaturas superiores al PLA y pueden aumentar el consumo eléctrico.</string>
+    <string name="print_power_references">Si no puedes medir el consumo de tu impresora, puedes utilizar estos valores como referencia inicial:\n\nPLA: 120 W\nPETG: 140 W\nASA, ABS y materiales de alta temperatura: 180 W</string>
+    <string name="print_power_caution">Estos valores son orientativos. Las mediciones reales de tu impresora ofrecerán estimaciones más precisas.</string>
 </resources>
 

@@ -40,8 +40,8 @@ class StateTests {
         assertNull(preferredFilament(fs.map{it.copy(active=false)}));assertNull(preferredFilament(emptyList()))
     }
     @Test fun editorDefaultsAndRequiredPriceTypeBrand() {
-        val editor=EditorDraft();assertEquals("1000",editor.weight);assertEquals("120",editor.power);assertEquals("",editor.price);assertTrue(editor.active);assertNull(editor.build())
-        val valid=editor.copy(material="PLA",brand=" Brand ",variant=" Matte ",price="12,5")
+        val editor=EditorDraft();assertEquals("1000",editor.weight);assertEquals("",editor.power);assertEquals("",editor.price);assertTrue(editor.active);assertNull(editor.build())
+        val valid=editor.copy(material="PLA",brand=" Brand ",variant=" Matte ",price="12,5",power="120")
         assertEquals("PLA Matte · Brand",valid.build()!!.displayName)
         assertNull(valid.copy(material=" ").build());assertNull(valid.copy(brand=" ").build())
         assertNull(valid.copy(weight="0").build());assertNull(valid.copy(price="-1").build());assertNull(valid.copy(power="-1").build())

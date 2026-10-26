@@ -28,7 +28,8 @@ data class UiState(
     val editor: EditorDraft? = null,
     val deleting: Filament? = null,
     val notice: StorageNotice? = null,
-    val saving: Boolean = false
+    val saving: Boolean = false,
+    val onboarding: OnboardingState = OnboardingState.legacy()
 ) {
     val selected get() = preferredFilament(filaments, selectedId)
     val electricityValid get() = NumericInput.nonNegative(electricityText) != null
@@ -45,18 +46,24 @@ class MakerTallyViewModel(private val repository: AppRepository, private val sav
     ))
     val state = _state.asStateFlow()
     private val writes = Mutex()
+    private var setupWrites = 0
     init {
         viewModelScope.launch {
             var loaded = repository.load()
-            if (platformLanguage in listOf("es-ES", "en-US") && platformLanguage != loaded.settings.language) {
+            if (loaded.onboarding.completed && !loaded.migratedLegacy && platformLanguage in listOf("es-ES", "en-US") && platformLanguage != loaded.settings.language) {
                 val settings = loaded.settings.copy(language = platformLanguage!!)
                 try { repository.saveSettings(settings); loaded = loaded.copy(settings = settings) }
                 catch (_: IOException) { loaded = loaded.copy(notices = loaded.notices + StorageNotice.SaveFailed) }
             }
             val selected = preferredFilament(loaded.filaments, _state.value.selectedId
-                ?: loaded.filaments.firstOrNull { it.material == "ASA" && it.brand == "eSun" && it.active }?.id)
+                ?: if(loaded.onboarding.newInstallation) loaded.onboarding.genericId
+                else loaded.filaments.firstOrNull { it.material == "ASA" && it.brand == "eSun" && it.active }?.id)
+            val fresh = loaded.onboarding.newInstallation
+            val input = CalculatorInput(saved["weight"] ?: if(fresh) "" else "141",
+                saved["hours"] ?: if(fresh) "" else "6",saved["minutes"] ?: "0")
             _state.value = _state.value.copy(ready = true, settings = loaded.settings, filaments = loaded.filaments,
-                selectedId = selected?.id, input = _state.value.input.localized(loaded.settings.language),
+                selectedId = selected?.id, input = input.localized(loaded.settings.language),onboarding=loaded.onboarding,
+                destination=if(fresh && loaded.onboarding.completed && !loaded.onboarding.filamentIntroSeen) Destination.Filaments else _state.value.destination,
                 electricityText = saved["electricity"] ?: Formatting.input(loaded.settings.electricityPrice, loaded.settings.language),
                 electricityTaxText = saved["electricityTax"] ?: Formatting.input(loaded.settings.electricityTaxPercent, loaded.settings.language),
                 notice = loaded.notices.firstOrNull())
@@ -138,6 +145,44 @@ class MakerTallyViewModel(private val repository: AppRepository, private val sav
         }
     }
     fun dismissNotice() { update { it.copy(notice = null) } }
+    fun onboardingField(field: SetupField, text: String) = persistSetup(_state.value.onboarding.field(field,text))
+    fun onboardingBack() {
+        if(!_state.value.saving) persistSetup(_state.value.onboarding.back())
+    }
+    fun onboardingNext() {
+        val current = _state.value
+        if(!current.saving && current.onboarding.canAdvance) persistSetup(current.onboarding.next())
+    }
+    private fun persistSetup(next: OnboardingState) {
+        setupWrites++
+        update { it.copy(onboarding=next,saving=true) }
+        viewModelScope.launch {
+            writes.withLock {
+                try { repository.saveOnboarding(next) }
+                catch (_: IOException) { update { it.copy(notice=StorageNotice.SaveFailed) } }
+                finally { setupWrites--;update { it.copy(saving=setupWrites>0) } }
+            }
+        }
+    }
+    fun completeOnboarding() {
+        val current = _state.value
+        if(current.saving || current.onboarding.completed || current.onboarding.step != SetupStep.Complete || !current.onboarding.canAdvance) return
+        update { it.copy(saving=true) }
+        viewModelScope.launch {
+            writes.withLock {
+                try {
+                    val loaded = repository.completeOnboarding(current.onboarding)
+                    saved["weight"]="";saved["hours"]="";saved["minutes"]="0";saved["tab"]=Destination.Filaments.ordinal
+                    update { it.copy(settings=loaded.settings,filaments=loaded.filaments,onboarding=loaded.onboarding,
+                        input=CalculatorInput("","","0"),selectedId=preferredFilament(loaded.filaments,loaded.onboarding.genericId)?.id,
+                        destination=Destination.Filaments,electricityText=Formatting.input(loaded.settings.electricityPrice,loaded.settings.language),
+                        electricityTaxText=Formatting.input(loaded.settings.electricityTaxPercent,loaded.settings.language)) }
+                } catch (_: IOException) { update { it.copy(notice=StorageNotice.SaveFailed) } }
+                finally { update { it.copy(saving=false) } }
+            }
+        }
+    }
+    fun acknowledgeFilamentIntro() = persistSetup(_state.value.onboarding.copy(filamentIntroSeen=true))
     private inline fun update(transform: (UiState) -> UiState) { _state.value = transform(_state.value) }
 }
 

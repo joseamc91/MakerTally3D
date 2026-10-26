@@ -46,39 +46,87 @@ class AndroidPrivateFiles(private val directory: File) : PrivateFiles {
 class PreferencesRepository(
     private val preferences: DataStore<Preferences>,
     private val files: PrivateFiles,
-    private val recoveredCorruption: () -> Boolean = { false }
+    private val recoveredCorruption: () -> Boolean = { false },
+    private val priorSettingsFile: Boolean = false,
+    private val initialLanguage: String = "en-US"
 ) : AppRepository {
     private val key = stringPreferencesKey("settings_json")
-    private val library = FilamentStore(files)
+    private val setupKey = stringPreferencesKey("onboarding_json")
+    private val library = FilamentStore(files) { emptyList() }
     override suspend fun load(): LoadedApp = withContext(Dispatchers.IO) {
         val notices = mutableListOf<StorageNotice>()
+        val prefs = try { preferences.data.first() } catch (_: java.io.IOException) {
+            // Unknown/unreadable existing storage must never be mistaken for a new install.
+            return@withContext LoadedApp(AppSettings(),emptyList(),listOf(StorageNotice.ReadFailed))
+        }
+        val setupText = prefs[setupKey]
+        var setup = setupText?.let { text ->
+            try { DataCodec.decodeOnboarding(text) } catch (_: IllegalArgumentException) {
+                notices += StorageNotice.InvalidData
+                try { files.writeAtomically("onboarding.json.invalid",text) }
+                catch (_: java.io.IOException) { notices += StorageNotice.SaveFailed }
+                null
+            }
+        }
+        var migrated = false
+        if(setup == null) {
+            val hasLibrary = try { files.read("filaments.json") != null } catch (_: java.io.IOException) {
+                return@withContext LoadedApp(AppSettings(),emptyList(),notices + StorageNotice.ReadFailed)
+            }
+            migrated = priorSettingsFile || prefs[key] != null || hasLibrary
+            setup = if(migrated) OnboardingState.legacy() else OnboardingState(language=initialLanguage)
+            try { saveOnboarding(setup) } catch (_: java.io.IOException) { notices += StorageNotice.SaveFailed }
+        }
+        if(!setup.completed) {
+            // Do not initialize settings_json or filaments.json while onboarding is unfinished.
+            return@withContext LoadedApp(neutralSettings(setup.language),emptyList(),notices,setup)
+        }
         val settings = try {
-            val text = preferences.data.first()[key]
+            val text = prefs[key]
             if (text == null) {
-                AppSettings().also { saveSettings(it) }
+                (if(setup.newInstallation) neutralSettings(setup.language) else AppSettings()).also { saveSettings(it) }
             } else {
                 try { DataCodec.decodeSettings(text) } catch (_: IllegalArgumentException) {
                     notices += StorageNotice.InvalidData
-                    AppSettings().also {
+                    (if(setup.newInstallation) neutralSettings(setup.language) else AppSettings()).also {
                         try { files.writeAtomically("settings.json.invalid", text); saveSettings(it) }
                         catch (_: java.io.IOException) { notices += StorageNotice.SaveFailed }
                     }
                 }
             }
-        } catch (_: java.io.IOException) { notices += StorageNotice.ReadFailed; AppSettings() }
+        } catch (_: java.io.IOException) { notices += StorageNotice.ReadFailed; if(setup.newInstallation) neutralSettings(setup.language) else AppSettings() }
         if (recoveredCorruption()) notices += StorageNotice.InvalidData
         val loaded = library.load()
-        LoadedApp(settings, loaded.filaments, notices + loaded.notices)
+        LoadedApp(settings, loaded.filaments, notices + loaded.notices, setup, migrated)
     }
     override suspend fun saveSettings(settings: AppSettings) {
         val text = DataCodec.encodeSettings(settings)
         preferences.edit { it[key] = text }
     }
     override suspend fun saveFilaments(profiles: List<Filament>) = withContext(Dispatchers.IO) { library.save(profiles) }
+    override suspend fun saveOnboarding(state: OnboardingState) {
+        preferences.edit { it[setupKey] = DataCodec.encodeOnboarding(state) }
+    }
+    override suspend fun completeOnboarding(state: OnboardingState): LoadedApp = withContext(Dispatchers.IO) {
+        require(state.newInstallation && !state.completed && state.step == SetupStep.Complete && state.canAdvance)
+        val settings = state.settings()
+        // The persistent ID makes retries safe if the process stops between file and DataStore writes.
+        // Existing data, even an empty library, is never overwritten or appended to during a retry.
+        val text = files.read("filaments.json")
+        val profiles = if(text == null) listOf(state.genericFilament()).also { library.save(it) }
+            else DataCodec.decodeFilaments(text)
+        val complete = state.copy(completed=true)
+        preferences.edit { it[key]=DataCodec.encodeSettings(settings);it[setupKey]=DataCodec.encodeOnboarding(complete) }
+        LoadedApp(settings,profiles,onboarding=complete)
+    }
 }
 
 fun androidRepository(context: Context): AppRepository {
     val path = context.preferencesDataStoreFile("settings")
+    // Inspect before DataStore initialization/corruption repair can create or replace the file.
+    val priorSettingsFile = path.exists() || File(path.path + ".bak").exists()
+    val systemLanguage = android.content.res.Resources.getSystem().configuration.locales[0]?.language
+    val language = if(systemLanguage == "es") "es-ES" else "en-US"
     val recovered = java.util.concurrent.atomic.AtomicBoolean(false)
     val store = PreferenceDataStoreFactory.create(
         corruptionHandler = ReplaceFileCorruptionHandler {
@@ -89,6 +137,6 @@ fun androidRepository(context: Context): AppRepository {
         },
         produceFile = { path }
     )
-    return PreferencesRepository(store, AndroidPrivateFiles(context.filesDir)) { recovered.getAndSet(false) }
+    return PreferencesRepository(store, AndroidPrivateFiles(context.filesDir), { recovered.getAndSet(false) },priorSettingsFile,language)
 }
 

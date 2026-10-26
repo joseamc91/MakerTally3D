@@ -94,7 +94,7 @@ class ViewModelTests {
     @Test fun crudAndActivationKeepLibraryAndSelectionConsistent() = check { model,repo ->
         val asa=model.state.value.selected!!
         model.toggleActive(asa);runCurrent();assertFalse(repo.filaments.first{it.id==asa.id}.active);assertNotEquals(asa.id,model.state.value.selectedId)
-        model.edit();model.editor(EditorDraft(material="PLA",brand="Test",variant="Matte",price="10,12"));model.saveEditor();runCurrent()
+        model.edit();model.editor(EditorDraft(material="PLA",brand="Test",variant="Matte",price="10,12",power="120"));model.saveEditor();runCurrent()
         val f=repo.filaments.last();assertEquals("PLA Matte · Test",f.displayName);assertNull(model.state.value.editor)
         model.edit(f);model.editor(model.state.value.editor!!.copy(price="11.25"));model.saveEditor();runCurrent()
         assertEquals(f.id,repo.filaments.last().id);assertEquals(0,decimal("11.25").compareTo(repo.filaments.last().purchasePrice))
@@ -103,7 +103,7 @@ class ViewModelTests {
     }
     @Test fun failedSaveKeepsLibraryEditorAndShowsNotice() = check { model,repo ->
         val original=repo.filaments;repo.fail=true
-        model.edit();model.editor(EditorDraft(material="PLA",brand="Test",price="10"));model.saveEditor();runCurrent()
+        model.edit();model.editor(EditorDraft(material="PLA",brand="Test",price="10",power="120"));model.saveEditor();runCurrent()
         assertEquals(original,model.state.value.filaments);assertEquals(original,repo.filaments)
         assertNotNull(model.state.value.editor);assertEquals(StorageNotice.SaveFailed,model.state.value.notice);assertFalse(model.state.value.saving)
     }
